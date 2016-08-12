@@ -15,4 +15,4 @@
 	url = https://github.com/STclab/stm32nucleo-spirit1-lib
 [submodule "dev/ca8210"]
 	path = dev/ca8210
-	url = https://github.com/FlowM2M/ca8210-contiki.git
+	url = https://github.com/Cascoda/ca8210-contiki.git
