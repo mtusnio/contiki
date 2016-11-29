@@ -40,11 +40,9 @@ ifeq ($(USE_CC2520),1)
   CONTIKI_TARGET_SOURCEFILES +=  cc2520-arch.c
   MODULES += dev/cc2520
 else
-ifeq ($(USE_CA8210),1)
   CONTIKI_PLAT_DEFS += -D __USE_CA8210__
   MODULES += dev/ca8210 dev/ca8210/ports/source dev/ca8210/cascoda/ariadne/source dev/ca8210/cascoda/source
   MODULES += dev/ca8210/apps/test15_4/source
-endif
 endif
 
 MODULES += core/net core/net/mac core/net/llsec
