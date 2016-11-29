@@ -33,6 +33,8 @@
 #include <net/queuebuf.h>
 #include <net/mac/frame802154.h>
 
+#include <pic32_i2c.h>
+
 #include <lib/random.h>
 #include <time.h>
 #ifdef __USE_CC2520__
@@ -47,6 +49,44 @@
 #else
 #define PRINTF(...)
 #endif
+
+#define NVS_I2C_FREQUENCY   (100000)
+#define NVS_WRITE_ADDRESS   (0xA0)
+#define NVS_READ_ADDRESS    (0xA1)
+#define NVS_EUI_ADDRESS     (0xF8)
+
+static uint64_t
+get_mac_address(void)
+{
+  uint64_t mac_address;
+
+  if(i2c1_init() != 0 ||
+     i2c1_master_enable() != 0 ||
+     i2c1_set_frequency(NVS_I2C_FREQUENCY) != 0)
+  {
+    PRINTF("Failed to init I2C\n");
+    return 0;
+  }
+
+  if(i2c1_send_start() != 0 ||
+     i2c1_send_byte(NVS_WRITE_ADDRESS) != 0 ||
+     i2c1_send_byte(NVS_EUI_ADDRESS) != 0)
+  {
+    PRINTF("Failed to set the NVS read address\n");
+    return 0;
+  }
+
+  if(i2c1_send_repeated_start() != 0 ||
+     i2c1_send_byte(NVS_READ_ADDRESS) != 0 ||
+     i2c1_set_nack(0) != 0 ||
+     i2c1_receive_bytes((uint8_t*)&mac_address, sizeof(mac_address)) != 0)
+  {
+    PRINTF("Failed to read MAC address bytes\n");
+    return 0;
+  }
+
+  return mac_address;
+}
 
 /*---------------------------------------------------------------------------*/
 void
@@ -72,7 +112,7 @@ net_init()
   #ifdef __USE_CC2520__
     cc2520_get_random((uint8_t *)&longaddr, sizeof(longaddr));
   #elif  __USE_CA8210__
-    ca8210_get_random((uint8_t *)&longaddr, sizeof(longaddr));
+    longaddr = get_mac_address();
   #endif
   #else
   longaddr = FIXED_MAC_ADDRESS;
