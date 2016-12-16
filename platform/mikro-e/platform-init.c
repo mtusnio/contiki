@@ -90,7 +90,7 @@ platform_init()
     TRISDSET = _TRISD_TRISD5_MASK;
     INT1R = 0b0110;
 
-  #elif __USE_CA8210
+  #elif __USE_CA8210__
 
     /* INT1 for CA8210 NIRQ: RD1 */
     TRISDSET = _TRISD_TRISD1_MASK;
