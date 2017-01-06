@@ -119,6 +119,7 @@ void cc2520_get_random(uint8_t *num, int count);
     CC2520_SPI_ENABLE();                                                \
     SPI_WRITE((CC2520_INS_MEMRD | ((adr>>8)&0xFF)));                    \
     SPI_WRITE((adr & 0xFF));                                            \
+    (void)SPI_RXBUF;                                                    \
     SPI_READ(data);                                                     \
     CC2520_SPI_DISABLE();                                               \
   } while(0)
