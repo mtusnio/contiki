@@ -30,6 +30,7 @@
  */
 
 #include "cfs-coffee-arch.h"
+#include <string.h>
 #include <p32xxxx.h>
 
 #include "cfs/cfs.h"
@@ -47,7 +48,7 @@ pic32_flash_erase(coffee_page_t sector)
   flash_erase(erase_addr);
 
   for(pos = 0; pos < COFFEE_SECTOR_SIZE; pos+=4) {
-      flash_write_word(erase_addr + pos, 0);
+      flash_write_word((char*)erase_addr + pos, 0);
   }
 }
 
