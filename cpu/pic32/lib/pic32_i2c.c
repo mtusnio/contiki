@@ -48,6 +48,7 @@
 
 #ifdef __USE_I2C__
 
+#include <stdio.h>
 #include <stdint.h>
 #include <p32xxxx.h>
 #include <pic32_clock.h>

@@ -30,6 +30,7 @@
  */
 
 #include <p32xxxx.h>
+#include <string.h>
 
 #include "contiki.h"
 #include "dev/flash.h"
