@@ -1,13 +1,13 @@
 /*
  * Contiki PIC32 Port project
- * 
+ *
  * Copyright (c) 2012,
  *  Scuola Superiore Sant'Anna (http://www.sssup.it) and
  *  Consorzio Nazionale Interuniversitario per le Telecomunicazioni
  *  (http://www.cnit.it).
  *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -44,7 +44,7 @@
  * @{
  */
 
-/** 
+/**
  * \file   pic32.h
  * \brief  PIC32MX initialization routines
  * \author Giovanni Pellerano <giovanni.pellerano@evilaliv3.org>
@@ -56,17 +56,17 @@
 
 /*
  * PIC32MX795F512L - Specific Functions
- * 
+ *
  * All the functions in this part of the file are specific for the
  * pic32mx795f512l that is characterized by registers' name that differ from
  * the 3xx and 4xx families of the pic32mx.
  */
 
-/*  Initial Configuration 
+/*  Initial Configuration
  *
  *  Main Clock       -> SYSCLK = (Crystal_Freq / FPLLIDIV) * FPLLMUL / FPLLODIV
  *  Peripheral Clock -> PBCLK  = SYSCLK / FPBDIV
- * 
+ *
  *  SYSCLK = 80MHz, PBCLK = 40MHz
 */
 
@@ -88,7 +88,7 @@
 #pragma config BWP       = OFF               // Boot Flash Write Protect
 #pragma config PWP       = OFF               // Program Flash Write Protect
 #pragma config ICESEL    = ICS_PGx2          // ICE/ICD Comm Channel Select
-#pragma config DEBUG     = OFF               // Debugger Disabled for Starter Kit 
+#pragma config DEBUG     = OFF               // Debugger Disabled for Starter Kit
 #pragma config FSRSSEL   = PRIORITY_7
 
 #ifdef __32MX795F512L__
