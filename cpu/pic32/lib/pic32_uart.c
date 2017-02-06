@@ -88,11 +88,45 @@
 
 #include "dev/leds.h"
 
+#include "lpm.h"
+
 /*---------------------------------------------------------------------------*/
 #define UART_PORT_INIT(XX, YY, ZZ, WW)                                                                          \
+  static uint32_t pic32_uart##XX##_state = 0;                                                                   \
+  static uint32_t pic32_uart##XX##_brg = 0;                                                                     \
+  int8_t                                                                                                        \
+  pic32_uart##XX##_power_down(void)                                                                             \
+  {                                                                                                             \
+    /*                                                                                                          \
+     * Save copy of register U##XX##MODE to restore its state                                                   \
+     * while powering up the peripheral.                                                                        \
+     * U##XX##BRG is cleared when powering down this peripheral.                                                \
+     */                                                                                                         \
+    pic32_uart##XX##_brg = U##XX##BRG;                                                                          \
+    pic32_uart##XX##_state = U##XX##MODE;                                                                       \
+                                                                                                                \
+    U##XX##MODESET = _U##XX##MODE_SIDL_MASK; /* Sleep peripheral in idle mode */                                \
+    U##XX##MODECLR = _U##XX##MODE_UARTEN_MASK;                                                                  \
+    PMD5SET = _PMD5_U##XX##MD_MASK;                                                                             \
+    return 0;                                                                                                   \
+  }                                                                                                             \
+  int8_t                                                                                                        \
+  pic32_uart##XX##_power_up(void)                                                                               \
+  {                                                                                                             \
+    PMD5CLR = _PMD5_U##XX##MD_MASK;                                                                             \
+    U##XX##BRG = pic32_uart##XX##_brg;                                                                          \
+    U##XX##MODE = pic32_uart##XX##_state;                                                                       \
+    return 0;                                                                                                   \
+  }                                                                                                             \
+  static lpm_registered_peripheral_t pic32_uart##XX##_periph = {                                                \
+    .power_up = pic32_uart##XX##_power_up,                                                                      \
+    .power_down = pic32_uart##XX##_power_down                                                                   \
+  };                                                                                                            \
   int8_t                                                                                                        \
   pic32_uart##XX##_init(uint32_t baudrate, uint16_t byte_format)                                                \
   {                                                                                                             \
+    pic32_uart##XX##_power_up();                                                                                \
+                                                                                                                \
     /* Disable Interrupts: RX, TX, ERR */                                                                       \
     IEC##ZZ##CLR = _IEC##ZZ##_U##XX##EIE_MASK | _IEC##WW##_U##XX##TXIE_MASK | _IEC##ZZ##_U##XX##RXIE_MASK;      \
     IFS##ZZ##CLR = _IFS##ZZ##_U##XX##EIF_MASK | _IFS##WW##_U##XX##TXIF_MASK | _IFS##ZZ##_U##XX##RXIF_MASK;      \
@@ -116,8 +150,12 @@
                                                                                                                 \
     IEC##ZZ##SET = _IEC##ZZ##_U##XX##RXIE_MASK;                                                                 \
                                                                                                                 \
+                                                                                                                \
     /* Enable UART port */                                                                                      \
     U##XX##MODESET = _U##XX##MODE_UARTEN_MASK;                                                                  \
+                                                                                                                \
+    /* Register UART port to lpm module */                                                                      \
+    lpm_register_peripheral(&pic32_uart##XX##_periph);                                                          \
                                                                                                                 \
     return UART_NO_ERROR;                                                                                       \
   }
