@@ -39,6 +39,7 @@
 #include <debug-uart.h>
 #include <pic32_irq.h>
 #include <pic32_cn_irq.h>
+#include "lpm.h"
 #include <dev/ca8210/ca8210-radio.h>
 #include "dev/serial-line.h"
 #include <net-init.h>
@@ -101,6 +102,7 @@ main(int argc, char **argv)
   clock_init();
   leds_init();
   platform_init();
+  lpm_init();
 
   process_init();
   process_start(&etimer_process, NULL);
@@ -135,7 +137,7 @@ main(int argc, char **argv)
       r = process_run();
     } while(r > 0);
     watchdog_stop();
-    asm volatile("wait");
+    lpm_enter();
     watchdog_start();
   }
 
