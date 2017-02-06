@@ -42,6 +42,8 @@
 #ifdef __USE_I2C__
 /*---------------------------------------------------------------------------*/
 #define I2C_DEF(XX)                                          \
+  int8_t pic32_i2c##XX##_power_down(void);                         \
+  int8_t pic32_i2c##XX##_power_up(void);                           \
   uint8_t pic32_i2c##XX##_init();                                  \
   uint8_t pic32_i2c##XX##_bus_idle();                              \
   uint8_t pic32_i2c##XX##_set_frequency (uint32_t );               \
