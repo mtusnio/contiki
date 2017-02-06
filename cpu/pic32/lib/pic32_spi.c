@@ -79,6 +79,7 @@
 #include <pic32_irq.h>
 
 #include <p32xxxx.h>
+#include "lpm.h"
 
 /*
  * PIC32MX795F512L - Specific Functions
@@ -92,9 +93,42 @@
 
 /*---------------------------------------------------------------------------*/
 #define SPI_PORT(XX, YY)                                    \
+  static uint32_t pic32_spi##XX##_state = 0;                          \
+  static uint32_t pic32_spi##XX##_brg = 0;                            \
+  int8_t                                                              \
+  pic32_spi##XX##_power_down(void)                                    \
+  {                                                                   \
+    /*                                                                \
+     * Save copy of register SPI##XX##CON to restore its state        \
+     * while powering up the peripheral.                              \
+     * SPI##XX##BRG is cleared when powering down this peripheral.    \
+     */                                                               \
+    pic32_spi##XX##_state = SPI##XX##CON;                             \
+    pic32_spi##XX##_brg = SPI##XX##BRG;                               \
+                                                                      \
+    /* Sleep during idle mode */                                      \
+    SPI##XX##CONSET = _SPI##XX##CON_SIDL_MASK;                        \
+    SPI##XX##CONCLR = _SPI##XX##CON_ON_MASK;                          \
+    PMD5SET = _PMD5_SPI##XX##MD_MASK;                                 \
+    return 0;                                                         \
+  }                                                                   \
+  int8_t                                                              \
+  pic32_spi##XX##_power_up(void)                                      \
+  {                                                                   \
+    PMD5CLR = _PMD5_SPI##XX##MD_MASK;                                 \
+    SPI##XX##BRG = pic32_spi##XX##_brg;                               \
+    SPI##XX##CON = pic32_spi##XX##_state;                             \
+    return 0;                                                         \
+  }                                                                   \
+  static lpm_registered_peripheral_t pic32_spi##XX##_periph = {       \
+    .power_up = pic32_spi##XX##_power_up,                             \
+    .power_down = pic32_spi##XX##_power_down                          \
+  };                                                                  \
   int8_t                                                    \
   pic32_spi##XX##_init(uint32_t baudrate, uint32_t flags)   \
   {                                                         \
+                                                            \
+    pic32_spi##XX##_power_up();                             \
                                                             \
     IEC##YY##CLR = _IEC##YY##_SPI##XX##EIE_MASK |           \
                   _IEC##YY##_SPI##XX##TXIE_MASK |           \
@@ -115,6 +149,9 @@
     }                                                       \
                                                             \
     SPI##XX##CON = flags | _SPI##XX##CON_ON_MASK;           \
+                                                            \
+    /* Register SPI to lpm module */                        \
+    lpm_register_peripheral(&pic32_spi##XX##_periph);       \
                                                             \
     return SPI_NO_ERRORS;                                   \
   }                                                         \

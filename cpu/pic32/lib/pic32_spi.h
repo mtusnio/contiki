@@ -86,6 +86,8 @@
 #define SPI_DEFAULT                 (SPI_MASTER | SPI_SDO_ON_CLOCK_TO_IDLE)
 
 #define SPI_DEF(XX)                                               \
+  int8_t pic32_spi##XX##_power_down(void);                        \
+  int8_t pic32_spi##XX##_power_up(void);                          \
   int8_t pic32_spi##XX##_init(uint32_t baudrate, uint32_t flags); \
   int8_t pic32_spi##XX##_close();                                 \
   int8_t pic32_spi##XX##_write(const uint8_t *data, uint32_t len);\
