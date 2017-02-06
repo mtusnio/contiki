@@ -45,65 +45,65 @@
 /*---------------------------------------------------------------------------*/
 void tmp102_init(void)
 {
-  i2c1_init();
-  i2c1_set_frequency (I2C_FREQUENCY);
+  pic32_i2c1_init();
+  pic32_i2c1_set_frequency (I2C_FREQUENCY);
 }
 /*---------------------------------------------------------------------------*/
 void tmp102_reg_select(uint8_t reg)
 {
-  i2c1_master_enable();
-  i2c1_send_start();
-    if(i2c1_send_byte (TMP102_REG_WRITE)) {
-      i2c1_send_repeated_start();
-      if(i2c1_send_byte (TMP102_REG_WRITE)) {
+  pic32_i2c1_master_enable();
+  pic32_i2c1_send_start();
+    if(pic32_i2c1_send_byte (TMP102_REG_WRITE)) {
+      pic32_i2c1_send_repeated_start();
+      if(pic32_i2c1_send_byte (TMP102_REG_WRITE)) {
         printf("Failed the connection to Thermo3\n");
       }		
     }
   switch (reg) {
     case TMP102_TEMP:
-      i2c1_send_byte (TMP102_TEMP);
+      pic32_i2c1_send_byte (TMP102_TEMP);
       break;
     case TMP102_CONF:
-      i2c1_send_byte (TMP102_CONF);
+      pic32_i2c1_send_byte (TMP102_CONF);
       break;
     case TMP102_TLOW:
-      i2c1_send_byte (TMP102_TLOW);
+      pic32_i2c1_send_byte (TMP102_TLOW);
       break;
     case TMP102_THIGH:
-      i2c1_send_byte (TMP102_THIGH);
+      pic32_i2c1_send_byte (TMP102_THIGH);
       break;
     default:
       printf("Invalid Register Address\n");
       break;
   }
-  i2c1_send_stop();
-  i2c1_master_disable();
+  pic32_i2c1_send_stop();
+  pic32_i2c1_master_disable();
 }
 /*---------------------------------------------------------------------------*/
 void tmp102_reg_read(uint8_t *data)
 {
-  i2c1_master_enable();
-  i2c1_send_start();
+  pic32_i2c1_master_enable();
+  pic32_i2c1_send_start();
   /*command to TMP102 to Write data on bus */
-  if(i2c1_send_byte (TMP102_REG_READ)) {
+  if(pic32_i2c1_send_byte (TMP102_REG_READ)) {
     printf("Failed the connection to Thermo3\n");	
   }
-  i2c1_receive_byte(data);
-  i2c1_receive_byte((data + 1));
-  i2c1_send_stop();
-  i2c1_master_disable();
+  pic32_i2c1_receive_byte(data);
+  pic32_i2c1_receive_byte((data + 1));
+  pic32_i2c1_send_stop();
+  pic32_i2c1_master_disable();
 }
 /*---------------------------------------------------------------------------*/
 void tmp102_reg_write(uint8_t msb, uint8_t lsb)
 {
-  i2c1_master_enable();
-  i2c1_send_start();
+  pic32_i2c1_master_enable();
+  pic32_i2c1_send_start();
   /*command to TMP102 to Read data from bus */
-  i2c1_send_byte (TMP102_REG_WRITE);
-  i2c1_send_byte(msb);
-  i2c1_send_byte(lsb);
-  i2c1_send_stop();
-  i2c1_master_disable();
+  pic32_i2c1_send_byte (TMP102_REG_WRITE);
+  pic32_i2c1_send_byte(msb);
+  pic32_i2c1_send_byte(lsb);
+  pic32_i2c1_send_stop();
+  pic32_i2c1_master_disable();
 }
 /*---------------------------------------------------------------------------*/
 float tmp102_read_temp(void)
