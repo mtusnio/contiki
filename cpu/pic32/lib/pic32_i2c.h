@@ -70,5 +70,5 @@
 #endif /* __32MX470F512H__ */
 
 #endif /* __USE_I2C__ */
-  
+
 #endif /* INCLUDE_PIC32_I2C_H_ */
