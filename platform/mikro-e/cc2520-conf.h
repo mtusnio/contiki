@@ -32,9 +32,7 @@
 #ifndef __CC2520_CONF_H__
 #define __CC2520_CONF_H__
 
-#undef DEBUG /* Conflict with a macro named DEBUG defined in compiler */
 #include <p32xxxx.h>
-#undef DEBUG
 
 #include <pic32_gpio.h>
 
