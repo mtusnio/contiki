@@ -71,43 +71,43 @@ proximity_sensor_configure(int type, int value)
     case SENSORS_ACTIVE:
       if(value) {
         if(!proximity_sensor_mode) {
-          i2c1_init();
-          i2c1_set_frequency (I2C_FREQUENCY);
+          pic32_i2c1_init();
+          pic32_i2c1_set_frequency (I2C_FREQUENCY);
           I2C1CONCLR = _I2C1CON_SMEN_MASK;
           I2C1CONSET = _I2C1CON_ACKDT_MASK;
-          i2c1_master_enable();
-          i2c1_send_start();
+          pic32_i2c1_master_enable();
+          pic32_i2c1_send_start();
           /* proximity data enable and selftime enable */
-          i2c1_send_byte(WRITE_ADDR);
-          i2c1_send_byte(COMMAND_REG);
-          i2c1_send_byte(PROXIMITY_SELFTIME_EN);
-          i2c1_send_repeated_start();
+          pic32_i2c1_send_byte(WRITE_ADDR);
+          pic32_i2c1_send_byte(COMMAND_REG);
+          pic32_i2c1_send_byte(PROXIMITY_SELFTIME_EN);
+          pic32_i2c1_send_repeated_start();
           /* proximity measurement rate 4  measurement pre second */
-          i2c1_send_byte(WRITE_ADDR);
-          i2c1_send_byte(PROXIMITY_RATE_REG);
-          i2c1_send_byte(PROXIMITY_RATE_4);
-          i2c1_send_repeated_start();
+          pic32_i2c1_send_byte(WRITE_ADDR);
+          pic32_i2c1_send_byte(PROXIMITY_RATE_REG);
+          pic32_i2c1_send_byte(PROXIMITY_RATE_4);
+          pic32_i2c1_send_repeated_start();
           /* IRLED current 100 mA */
-          i2c1_send_byte(WRITE_ADDR);
-          i2c1_send_byte(IRLED_CUURENT_REG);
-          i2c1_send_byte(IRLED_CURRENT_100MA);
-          i2c1_send_repeated_start();
+          pic32_i2c1_send_byte(WRITE_ADDR);
+          pic32_i2c1_send_byte(IRLED_CUURENT_REG);
+          pic32_i2c1_send_byte(IRLED_CURRENT_100MA);
+          pic32_i2c1_send_repeated_start();
           /* High threshold register upper byte */
-          i2c1_send_byte(WRITE_ADDR);
-          i2c1_send_byte(HIGH_THRESHOLD_UPPER_REG);
-          i2c1_send_byte(THRESHOLD_UPPER_BYTE);
-          i2c1_send_repeated_start();
+          pic32_i2c1_send_byte(WRITE_ADDR);
+          pic32_i2c1_send_byte(HIGH_THRESHOLD_UPPER_REG);
+          pic32_i2c1_send_byte(THRESHOLD_UPPER_BYTE);
+          pic32_i2c1_send_repeated_start();
           /* High threshold register lower byte */
-          i2c1_send_byte(WRITE_ADDR);
-          i2c1_send_byte(HIGH_THRESHOLD_LOWER_REG);
-          i2c1_send_byte(THRESHOLD_LOWER_BYTE);
-          i2c1_send_repeated_start();
+          pic32_i2c1_send_byte(WRITE_ADDR);
+          pic32_i2c1_send_byte(HIGH_THRESHOLD_LOWER_REG);
+          pic32_i2c1_send_byte(THRESHOLD_LOWER_BYTE);
+          pic32_i2c1_send_repeated_start();
           /* Enable interrupt for Proximity sensor */
-          i2c1_send_byte(WRITE_ADDR);
-          i2c1_send_byte(INTERRUPT_CONTROL_REG);
-          i2c1_send_byte(INTERRUPT_REG_SETTING);
-          i2c1_send_stop();
-          i2c1_master_disable();
+          pic32_i2c1_send_byte(WRITE_ADDR);
+          pic32_i2c1_send_byte(INTERRUPT_CONTROL_REG);
+          pic32_i2c1_send_byte(INTERRUPT_REG_SETTING);
+          pic32_i2c1_send_stop();
+          pic32_i2c1_master_disable();
           PROXIMITY_SENSOR_IRQ_ENABLE();
           timer_set(&debouncetimer, 0);
           proximity_sensor_mode = 1;
@@ -130,21 +130,21 @@ proximity_sensor_value(int type)
 {
   uint8_t data[2];
   int     value;
-  i2c1_master_enable();
-  i2c1_send_start();
-  i2c1_send_byte(WRITE_ADDR);
-  i2c1_send_byte(PROXIMITY_DATA_UPPER_REG);
-  i2c1_send_repeated_start();
-  i2c1_send_byte(READ_ADDR);
-  i2c1_receive_byte(data);
-  i2c1_send_repeated_start();
-  i2c1_send_byte(WRITE_ADDR);
-  i2c1_send_byte(PROXIMITY_DATA_LOWER_REG);
-  i2c1_send_repeated_start();
-  i2c1_send_byte(READ_ADDR);
-  i2c1_receive_byte(data + 1);
-  i2c1_send_stop();
-  i2c1_master_disable();
+  pic32_i2c1_master_enable();
+  pic32_i2c1_send_start();
+  pic32_i2c1_send_byte(WRITE_ADDR);
+  pic32_i2c1_send_byte(PROXIMITY_DATA_UPPER_REG);
+  pic32_i2c1_send_repeated_start();
+  pic32_i2c1_send_byte(READ_ADDR);
+  pic32_i2c1_receive_byte(data);
+  pic32_i2c1_send_repeated_start();
+  pic32_i2c1_send_byte(WRITE_ADDR);
+  pic32_i2c1_send_byte(PROXIMITY_DATA_LOWER_REG);
+  pic32_i2c1_send_repeated_start();
+  pic32_i2c1_send_byte(READ_ADDR);
+  pic32_i2c1_receive_byte(data + 1);
+  pic32_i2c1_send_stop();
+  pic32_i2c1_master_disable();
   value = ((uint16_t)data[0] << 8) | data[1];
   return value;
 }
