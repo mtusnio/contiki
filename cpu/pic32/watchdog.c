@@ -58,7 +58,6 @@ void
 watchdog_init(void)
 {
   WDTCON = 0;
-  OSCCONSET = 0x10; /* Set power mode saving to Idle */
 }
 /*---------------------------------------------------------------------------*/
 void
