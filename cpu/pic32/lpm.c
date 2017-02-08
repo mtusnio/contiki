@@ -44,6 +44,7 @@
 
 
 #include <stddef.h>
+#include <p32xxxx.h>
 #include "lib/list.h"
 #include "lpm.h"
 
@@ -99,6 +100,19 @@ void
 lpm_init(void)
 {
   list_init(peripherals_list);
+
+  SYSKEY = 0;
+  SYSKEY = 0xaa996655;
+  SYSKEY = 0x556699aa;
+
+  /*
+   * Enable Idle Mode when wait instruction is executed.
+   * Idle mode is chosen instead of sleep to allow peripherals using the
+   * PBCLK to wake up the CPU.
+   */
+  OSCCONCLR = 1 << _OSCCON_SLPEN_POSITION;
+
+  SYSKEY = 0;
 }
 
 

@@ -70,7 +70,10 @@ void lpm_register_peripheral(lpm_registered_peripheral_t *peripheral);
 void lpm_unregister_peripheral(lpm_registered_peripheral_t *peripheral);
 
 /**
- * @brief Initialise the list of registered peripherals.
+ * @brief Initialise the Low power management module
+ *
+ * It initialises the list of registered peripherals and configures the
+ * CPU to enter idle mode if the wait instruction is executed.
  */
 void lpm_init(void);
 

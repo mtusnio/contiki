@@ -110,15 +110,6 @@ pic32_init(void)
 
   INTCONSET = _INTCON_MVEC_MASK;
 
-  SYSKEY = 0;
-  SYSKEY = 0xaa996655;
-  SYSKEY = 0x556699aa;
-
-  /* Enable Sleep Mode */
-  OSCCONCLR = 1 << _OSCCON_SLPEN_POSITION;
-
-  SYSKEY = 0;
-
   /*
    * Compute minimum number of wait state required such that
    *      (ws_count + 1) * FLASH_CLOCK_SPEED >= SYSCLK
