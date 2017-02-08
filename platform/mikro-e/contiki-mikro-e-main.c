@@ -47,6 +47,9 @@
 #include <sensors.h>
 #include "button-sensor.h"
 #include "dev/common-clicks.h"
+#include <pic32_i2c.h>
+#include <pic32_spi.h>
+#include <pic32_uart.h>
 
 #ifndef UART_DEBUG_BAUDRATE
 #define UART_DEBUG_BAUDRATE 115200
@@ -90,7 +93,37 @@ sensor_callback(void)
 #endif
 }
 #endif
+/*---------------------------------------------------------------------------*/
+static void
+power_down_peripherals(void)
+{
+  #ifdef __USE_SPI_PORT1__
+  pic32_spi1_power_down();
+  #endif /* __USE_SPI_PORT1__ */
+  #ifdef __USE_SPI_PORT2__
+  pic32_spi2_power_down();
+  #endif /* __USE_SPI_PORT2__ */
 
+  #ifdef __USE_UART_PORT1__
+  pic32_uart1_power_down();
+  #endif /* __USE_UART_PORT1__ */
+  #ifdef __USE_UART_PORT2__
+  pic32_uart2_power_down();
+  #endif /* __USE_UART_PORT2__ */
+  #ifdef __USE_UART_PORT3__
+  pic32_uart3_power_down();
+  #endif /* __USE_UART_PORT3__ */
+  #ifdef __USE_UART_PORT4__
+  pic32_uart4_power_down();
+  #endif /* __USE_UART_PORT4__ */
+
+  #ifdef __USE_I2C_PORT1__
+  pic32_i2c1_power_down();
+  #endif /* __USE_I2C_PORT1__ */
+  #ifdef __USE_I2C_PORT2__
+  pic32_i2c2_power_down();
+  #endif /* __USE_I2C_PORT2__ */
+}
 /*---------------------------------------------------------------------------*/
 int
 main(int argc, char **argv)
@@ -103,6 +136,12 @@ main(int argc, char **argv)
   leds_init();
   platform_init();
   lpm_init();
+
+  /*
+   * Power down all peripherals that have an API: SPI, I2C, UART.
+   * Any call to their init function will power up the peripheral.
+   */
+  power_down_peripherals();
 
   process_init();
   process_start(&etimer_process, NULL);
