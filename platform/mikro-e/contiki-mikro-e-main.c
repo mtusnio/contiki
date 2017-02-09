@@ -93,8 +93,9 @@ main(int argc, char **argv)
 #endif
   serial_line_init();
 
-  autostart_start(autostart_processes);
   watchdog_start();
+
+  autostart_start(autostart_processes);
 
   while(1) {
     do {
