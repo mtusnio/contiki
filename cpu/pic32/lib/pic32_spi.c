@@ -160,6 +160,7 @@
   pic32_spi##XX##_close()                                   \
   {                                                         \
     SPI##XX##CONCLR = _SPI##XX##CON_ON_MASK;                \
+    pic32_spi##XX##_power_down();                           \
     return SPI_NO_ERRORS;                                   \
   }                                                         \
                                                             \
