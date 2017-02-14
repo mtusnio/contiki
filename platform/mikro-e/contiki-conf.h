@@ -36,11 +36,6 @@
 #define DEBUG_HIGHER_LEVELS 0
 
 #include <inttypes.h>
-#ifdef __USE_CC2520__
-  #include "cc2520-conf.h"
-#elif  __USE_CA8210__
-  #include "ca8210-conf.h"
-#endif
 
 /* Include project config file if defined in the project Makefile */
 #ifdef PROJECT_CONF_H
