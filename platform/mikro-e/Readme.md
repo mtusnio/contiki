@@ -11,7 +11,7 @@ Some key paths of source code added to support Contiki on Mikro-E Clicker:
 
 | Folder              				| Content                                              							                      |
 | :----               				| :----                                                							                      |
-| platform/mikro-e			      | Porting of drivers for peripherals like Button, LED, CC2520, CA8210 etc. on Mikro-E Clicker			|
+| platform/mikro-e			      | Porting of drivers for peripherals like Button, LED, CA8210 etc. on Mikro-E Clicker			|
 | examples/mikro-e            | Applications for Mikro-E Clicker board                                                  |         
 
 ## Cascoda ca8210 transceiver support
@@ -29,20 +29,14 @@ environment variables and compile an example, say "Hello World" which is include
 
     $ export PATH=$PATH:/opt/microchip/xc32/v1.34/bin/
 
-* Platform mikro-e makefile builds the application for ca8210 by default, a cc2520 build can be enabled by passing USE_CC2520=1.
-* 6lowpan channel(default 26) and pan_id(default 0xabcd) can be passed from makefile options.
+* Platform mikro-e makefile builds the application for 6LoWPAN clicker.
+* 6LoWPAN channel(default 26) and pan_id(default 0xabcd) can be passed from makefile options.
 * For debugging purposes, UART3 will be used by default, but USE_SERIAL_PADS can be selected for UART2.
 
 The application e.g. Hello World can be built for Mikro-E Clicker and HEX file can be generated to flash on the board along with possible build options as per below:
 
-For clicker boards using CA8210:
 
     $ cd examples/hello-world
     $ make TARGET=mikro-e CHANNEL=26 PAN_ID=0xabcd USE_SERIAL_PADS=1
     $ /opt/microchip/xc32/v1.34/bin/xc32-bin2hex hello-world.mikro-e
 
-For clicker boards using CC2520:
-
-    $ cd examples/hello-world
-    $ make TARGET=mikro-e USE_CC2520=1 CHANNEL=26 PAN_ID=0xabcd USE_SERIAL_PADS=1
-    $ /opt/microchip/xc32/v1.34/bin/xc32-bin2hex hello-world.mikro-e

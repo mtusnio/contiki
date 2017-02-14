@@ -38,11 +38,7 @@
 #include <platform-init.h>
 #include <debug-uart.h>
 #include <pic32_irq.h>
-#ifdef __USE_CC2520__
-  #include <dev/cc2520/cc2520.h>
-#elif  __USE_CA8210__
-  #include <dev/ca8210/ca8210-radio.h>
-#endif
+#include <dev/ca8210/ca8210-radio.h>
 #include "dev/serial-line.h"
 #include <net-init.h>
 #include <leds.h>
@@ -135,15 +131,8 @@ ISR(_CHANGE_NOTICE_VECTOR)
 
 
 /*---------------------------------------------------------------------------*/
-#ifdef __USE_CC2520__
- ISR(_EXTERNAL_1_VECTOR)
- {
-    cc2520_interrupt();
- }
-#elif __USE_CA8210__
  ISR(_EXTERNAL_1_VECTOR)
  {
     ca8210_interrupt();
  }
-#endif
 /*---------------------------------------------------------------------------*/
