@@ -90,8 +90,7 @@
 
 #include "lpm.h"
 
-/*---------------------------------------------------------------------------*/
-#define UART_PORT_INIT(XX, YY, ZZ, WW)                                                                          \
+#define UART_PORT_LPM(XX)                                                                                       \
   static uint32_t pic32_uart##XX##_state = 0;                                                                   \
   static uint32_t pic32_uart##XX##_brg = 0;                                                                     \
   int8_t                                                                                                        \
@@ -118,10 +117,19 @@
     U##XX##MODE = pic32_uart##XX##_state;                                                                       \
     return 0;                                                                                                   \
   }                                                                                                             \
-  static lpm_registered_peripheral_t pic32_uart##XX##_periph = {                                                \
+  lpm_registered_peripheral_t pic32_uart##XX##_periph = {                                                       \
     .power_up = pic32_uart##XX##_power_up,                                                                      \
     .power_down = pic32_uart##XX##_power_down                                                                   \
-  };                                                                                                            \
+  };
+/*---------------------------------------------------------------------------*/
+#define UART_PORT_LPM_DUMMY(XX)                                                                                 \
+  static int8_t                                                                                                 \
+  pic32_uart##XX##_power_up(void)                                                                               \
+  {                                                                                                             \
+    return 0;                                                                                                   \
+  }
+/*---------------------------------------------------------------------------*/
+#define UART_PORT_INIT(XX, YY, ZZ, WW)                                                                          \
   int8_t                                                                                                        \
   pic32_uart##XX##_init(uint32_t baudrate, uint16_t byte_format)                                                \
   {                                                                                                             \
@@ -153,9 +161,6 @@
                                                                                                                 \
     /* Enable UART port */                                                                                      \
     U##XX##MODESET = _U##XX##MODE_UARTEN_MASK;                                                                  \
-                                                                                                                \
-    /* Register UART port to lpm module */                                                                      \
-    lpm_register_peripheral(&pic32_uart##XX##_periph);                                                          \
                                                                                                                 \
     return UART_NO_ERROR;                                                                                       \
   }
@@ -219,21 +224,41 @@
 
 #ifdef __32MX470F512H__
   #ifdef __USE_UART_PORT1__
+    #if defined __USE_LPM__ && defined __ENABLE_UART_PORT1_LPM__
+      UART_PORT_LPM(1)
+    #else
+      UART_PORT_LPM_DUMMY(1)
+    #endif /* __USE_LPM__ && __ENABLE_UART_PORT1_LPM__ */
   UART_PORT(1, 1)
   UART_PORT_INIT(1, 7, 1, 1)
   #endif /* __USE_UART_PORT1__ */
 
   #ifdef __USE_UART_PORT2__
+    #if defined __USE_LPM__ && defined __ENABLE_UART_PORT2_LPM__
+      UART_PORT_LPM(2)
+    #else
+      UART_PORT_LPM_DUMMY(2)
+    #endif /* __USE_LPM__ && __ENABLE_UART_PORT2_LPM__ */
   UART_PORT(2, 1)
   UART_PORT_INIT(2, 9, 1, 1)
   #endif /* __USE_UART_PORT2__ */
 
   #ifdef __USE_UART_PORT3__
+    #if defined __USE_LPM__ && defined __ENABLE_UART_PORT3_LPM__
+      UART_PORT_LPM(3)
+    #else
+      UART_PORT_LPM_DUMMY(3)
+    #endif /* __USE_LPM__ && __ENABLE_UART_PORT3_LPM__ */
   UART_PORT(3, 1)
   UART_PORT_INIT(3, 9, 1, 2)
   #endif /* __USE_UART_PORT3__ */
 
   #ifdef __USE_UART_PORT4__
+    #if defined __USE_LPM__ && defined __ENABLE_UART_PORT4_LPM__
+      UART_PORT_LPM(4)
+    #else
+      UART_PORT_LPM_DUMMY(4)
+    #endif /* __USE_LPM__ && __ENABLE_UART_PORT4_LPM__ */
   UART_PORT(4, 1)
   UART_PORT_INIT(4, 9, 2, 2)
   #endif /* __USE_UART_PORT4__ */

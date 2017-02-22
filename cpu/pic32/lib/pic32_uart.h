@@ -67,6 +67,7 @@
 #include <stdint.h>
 
 #include "dev/leds.h"
+#include "lpm.h"
 
 #define BAUD2UBR(x)                x
 
@@ -76,8 +77,6 @@
 #define UART_ERR_OVERFLOW          2
 
 #define UART_PORT_DEF(XX)                                                \
-  int8_t pic32_uart##XX##_power_down(void);                              \
-  int8_t pic32_uart##XX##_power_up(void);                                \
   int8_t pic32_uart##XX##_init(uint32_t baudrate, uint16_t byte_format); \
   int8_t pic32_uart##XX##_write(uint8_t data);                           \
   void uart##XX##_set_input(int (*input) (unsigned char c));             \
@@ -102,6 +101,10 @@
       U##XX##STACLR = _U##XX##STA_OERR_MASK;                             \
     }                                                                    \
   }
+#define UART_PORT_LPM_DEF(XX)                                            \
+  int8_t pic32_uart##XX##_power_down(void);                              \
+  int8_t pic32_uart##XX##_power_up(void);                                \
+  extern lpm_registered_peripheral_t pic32_uart##XX##_periph;
 
 #ifdef __32MX795F512L__
   #ifdef __USE_UART_PORT1A__
@@ -132,18 +135,30 @@
 #ifdef __32MX470F512H__
   #ifdef __USE_UART_PORT1__
   UART_PORT_DEF(1)
+    #if defined __USE_LPM__ && defined __ENABLE_UART_PORT1_LPM__
+    UART_PORT_LPM_DEF(1)
+    #endif /* __USE_LPM__ && __ENABLE_UART_PORT1_LPM__ */
   #endif /* __USE_UART_PORT1__ */
 
   #ifdef __USE_UART_PORT2__
   UART_PORT_DEF(2)
+    #if defined __USE_LPM__ && defined __ENABLE_UART_PORT2_LPM__
+    UART_PORT_LPM_DEF(2)
+    #endif /* __USE_LPM__ && __ENABLE_UART_PORT2_LPM__ */
   #endif /* __USE_UART_PORT2__ */
 
   #ifdef __USE_UART_PORT3__
   UART_PORT_DEF(3)
+    #if defined __USE_LPM__ && defined __ENABLE_UART_PORT3_LPM__
+    UART_PORT_LPM_DEF(3)
+    #endif /* __USE_LPM__ && __ENABLE_UART_PORT3_LPM__ */
   #endif /* __USE_UART_PORT3__ */
 
   #ifdef __USE_UART_PORT4__
   UART_PORT_DEF(4)
+    #if defined __USE_LPM__ && defined __ENABLE_UART_PORT4_LPM__
+    UART_PORT_LPM_DEF(4)
+    #endif /* __USE_LPM__ && __ENABLE_UART_PORT4_LPM__ */
   #endif /* __USE_UART_PORT4__ */
 #endif /* __32MX470F512H__ */
 
