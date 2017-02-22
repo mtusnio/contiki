@@ -92,7 +92,7 @@
 #define IS_MASTER(flags)    ((flags) & SPI_MASTER)
 
 /*---------------------------------------------------------------------------*/
-#define SPI_PORT(XX, YY)                                    \
+#define SPI_PORT_LPM(XX)                                              \
   static uint32_t pic32_spi##XX##_state = 0;                          \
   static uint32_t pic32_spi##XX##_brg = 0;                            \
   int8_t                                                              \
@@ -120,14 +120,27 @@
     SPI##XX##CON = pic32_spi##XX##_state;                             \
     return 0;                                                         \
   }                                                                   \
-  static lpm_registered_peripheral_t pic32_spi##XX##_periph = {       \
+  lpm_registered_peripheral_t pic32_spi##XX##_periph = {              \
     .power_up = pic32_spi##XX##_power_up,                             \
     .power_down = pic32_spi##XX##_power_down                          \
-  };                                                                  \
+  };
+/*---------------------------------------------------------------------------*/
+#define SPI_PORT_LPM_DUMMY(XX)                                        \
+  static int8_t                                                       \
+  pic32_spi##XX##_power_up(void)                                      \
+  {                                                                   \
+    return 0;                                                         \
+  }                                                                   \
+  static int8_t                                                       \
+  pic32_spi##XX##_power_down(void)                                    \
+  {                                                                   \
+    return 0;                                                         \
+  }
+/*---------------------------------------------------------------------------*/
+#define SPI_PORT(XX, YY)                                              \
   int8_t                                                    \
   pic32_spi##XX##_init(uint32_t baudrate, uint32_t flags)   \
   {                                                         \
-                                                            \
     pic32_spi##XX##_power_up();                             \
                                                             \
     IEC##YY##CLR = _IEC##YY##_SPI##XX##EIE_MASK |           \
@@ -149,9 +162,6 @@
     }                                                       \
                                                             \
     SPI##XX##CON = flags | _SPI##XX##CON_ON_MASK;           \
-                                                            \
-    /* Register SPI to lpm module */                        \
-    lpm_register_peripheral(&pic32_spi##XX##_periph);       \
                                                             \
     return SPI_NO_ERRORS;                                   \
   }                                                         \
@@ -262,12 +272,22 @@
 
 #ifdef __32MX470F512H__
   #ifdef __USE_SPI_PORT1__
+  #if defined __USE_LPM__ && defined __ENABLE_SPI_PORT1_LPM__
+    SPI_PORT_LPM(1)
+  #else
+    SPI_PORT_LPM_DUMMY(1)
+  #endif
   SPI_PORT(1, 1)
-  #endif /* __USE_SPI_PORT1__ */
+  #endif /* __USE_LPM__ && __USE_SPI_PORT1__ */
 
   #ifdef __USE_SPI_PORT2__
+  #if defined __USE_LPM__ && defined __ENABLE_SPI_PORT2_LPM__
+    SPI_PORT_LPM(2)
+  #else
+    SPI_PORT_LPM_DUMMY(2)
+  #endif
   SPI_PORT(2, 1)
-  #endif /* __USE_SPI_PORT2__ */
+  #endif /* __USE_LPM__ && __USE_SPI_PORT2__ */
 #endif
 
 #endif /* __USE_SPI__ */
