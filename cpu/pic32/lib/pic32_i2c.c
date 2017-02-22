@@ -55,7 +55,7 @@
 #include <pic32_i2c.h>
 #include "lpm.h"
 /*----------------------------------------------------------------------------------------------*/
-#define I2C_PORT(XX)                                                     \
+#define I2C_PORT_LPM(XX)                                                 \
   static uint32_t pic32_i2c##XX##_state = 0;                             \
   static uint32_t pic32_i2c##XX##_brg = 0;                               \
   int8_t                                                                 \
@@ -83,10 +83,19 @@
     I2C##XX##CON = pic32_i2c##XX##_state;                                \
     return 0;                                                            \
   }                                                                      \
-  static lpm_registered_peripheral_t pic32_i2c##XX##_periph = {          \
+  lpm_registered_peripheral_t pic32_i2c##XX##_periph = {                 \
     .power_up = pic32_i2c##XX##_power_up,                                \
     .power_down = pic32_i2c##XX##_power_down                             \
-  };                                                                     \
+  };
+/*----------------------------------------------------------------------------------------------*/
+#define I2C_PORT_LPM_DUMMY(XX)                                           \
+  static int8_t                                                          \
+  pic32_i2c##XX##_power_up(void)                                         \
+  {                                                                      \
+     return 0;                                                           \
+  }
+/*----------------------------------------------------------------------------------------------*/
+#define I2C_PORT(XX)                                                     \
   static uint8_t pic32_i2c##XX##_nack_bit = 0;                           \
   uint8_t                                                                \
   pic32_i2c##XX##_bus_idle(void)                                         \
@@ -110,8 +119,6 @@
     I2C##XX##CON = 0;                                                    \
     I2C##XX##CONSET = _I2C##XX##CON_SMEN_MASK;                           \
                                                                          \
-    /* Register I2C to lpm module */                                     \
-    lpm_register_peripheral(&pic32_i2c##XX##_periph);                    \
     return 0;                                                            \
   }                                                                      \
   uint8_t                                                                \
@@ -234,10 +241,20 @@
 
 #ifdef __32MX470F512H__
   #ifdef __USE_I2C_PORT1__
+    #if defined __USE_LPM__ && defined __ENABLE_I2C_PORT1_LPM__
+      I2C_PORT_LPM(1)
+    #else
+      I2C_PORT_LPM_DUMMY(1)
+    #endif /* __USE_LPM__ && __ENABLE_I2C_PORT1_LPM__ */
   I2C_PORT(1)
   #endif /* __USE_I2C_PORT1__ */
 
   #ifdef __USE_I2C_PORT2__
+    #if defined __USE_LPM__ && defined __ENABLE_I2C_PORT2_LPM__
+      I2C_PORT_LPM(2)
+    #else
+      I2C_PORT_LPM_DUMMY(2)
+    #endif /* __USE_LPM__ && __ENABLE_I2C_PORT2_LPM__ */
   I2C_PORT(2)
   #endif /* __USE_I2C_PORT2__ */
 #endif
