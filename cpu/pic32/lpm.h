@@ -29,8 +29,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LPM_H
-#define LPM_H
+/**
+ * \defgroup pic32 PIC32 Contiki Port
+ *
+ * @{
+ */
+
+/**
+ * \file   lpm.h
+ * \brief  Low power management for PIC32MX
+ * \author Francois Berder <francois.berder@imgtec.com>
+ * \date   2017-09-02
+ */
+
+#ifndef INCLUDE_PIC32_LPM_H_
+#define INCLUDE_PIC32_LPM_H_
+
+#ifdef __USE_LPM__
 
 #include <stdint.h>
 
@@ -77,4 +92,8 @@ void lpm_unregister_peripheral(lpm_registered_peripheral_t *peripheral);
  */
 void lpm_init(void);
 
-#endif /* LPM_H */
+#endif /* __USE_LPM__ */
+
+#endif /* INCLUDE_PIC32_LPM_H_ */
+
+/** @} */

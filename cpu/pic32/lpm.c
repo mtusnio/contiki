@@ -42,6 +42,7 @@
  * \date   2017-09-02
  */
 
+#ifdef __USE_LPM__
 
 #include <stddef.h>
 #include <p32xxxx.h>
@@ -115,5 +116,6 @@ lpm_init(void)
   SYSKEY = 0;
 }
 
+#endif /* __USE_LPM__ */
 
 /** @} */
