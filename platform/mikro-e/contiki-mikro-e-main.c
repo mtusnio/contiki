@@ -38,11 +38,7 @@
 #include <platform-init.h>
 #include <debug-uart.h>
 #include <pic32_irq.h>
-#ifdef __USE_CC2520__
-  #include <dev/cc2520/cc2520.h>
-#elif  __USE_CA8210__
-  #include <dev/ca8210/ca8210-radio.h>
-#endif
+#include <dev/ca8210/ca8210-radio.h>
 #include "dev/serial-line.h"
 #include <net-init.h>
 #include <leds.h>
@@ -53,7 +49,9 @@
 
 void (*interrupt_isr)(void) = NULL;
 
+#ifndef UART_DEBUG_BAUDRATE
 #define UART_DEBUG_BAUDRATE 115200
+#endif
 
 #ifdef MOTION_CLICK
 SENSORS(&button_sensor, &button_sensor2, &motion_sensor);
@@ -86,17 +84,18 @@ main(int argc, char **argv)
 
   dbg_setup_uart(UART_DEBUG_BAUDRATE);
   net_init();
-#ifdef __USE_UART_PORT3__
+#ifdef __USE_UART_PORT3_FOR_DEBUG__
   uart3_set_input(serial_line_input_byte);
-#elif  __USE_UART_PORT2__
+#elif  __USE_UART_PORT2_FOR_DEBUG__
   uart2_set_input(serial_line_input_byte);
 #endif
   serial_line_init();
 
-  autostart_start(autostart_processes);
 #ifndef __USE_AVRDUDE__
   watchdog_start();
 #endif
+
+  autostart_start(autostart_processes);
 
   while(1) {
     do {
@@ -140,15 +139,8 @@ ISR(_CHANGE_NOTICE_VECTOR)
 
 
 /*---------------------------------------------------------------------------*/
-#ifdef __USE_CC2520__
- ISR(_EXTERNAL_1_VECTOR)
- {
-    cc2520_interrupt();
- }
-#elif __USE_CA8210__
  ISR(_EXTERNAL_1_VECTOR)
  {
     ca8210_interrupt();
  }
-#endif
 /*---------------------------------------------------------------------------*/

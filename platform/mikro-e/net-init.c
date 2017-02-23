@@ -37,11 +37,7 @@
 
 #include <lib/random.h>
 #include <time.h>
-#ifdef __USE_CC2520__
-  #include <dev/cc2520/cc2520.h>
-#elif  __USE_CA8210__
-  #include <dev/ca8210/ca8210-radio.h>
-#endif
+#include <dev/ca8210/ca8210-radio.h>
 #define DEBUG 1
 #if DEBUG
 #include <stdio.h>
@@ -60,26 +56,26 @@ get_mac_address(void)
 {
   uint64_t mac_address;
 
-  if(i2c1_init() != 0 ||
-     i2c1_master_enable() != 0 ||
-     i2c1_set_frequency(NVS_I2C_FREQUENCY) != 0)
+  if(pic32_i2c1_init() != 0 ||
+     pic32_i2c1_master_enable() != 0 ||
+     pic32_i2c1_set_frequency(NVS_I2C_FREQUENCY) != 0)
   {
     PRINTF("Failed to init I2C\n");
     return 0;
   }
 
-  if(i2c1_send_start() != 0 ||
-     i2c1_send_byte(NVS_WRITE_ADDRESS) != 0 ||
-     i2c1_send_byte(NVS_EUI_ADDRESS) != 0)
+  if(pic32_i2c1_send_start() != 0 ||
+     pic32_i2c1_send_byte(NVS_WRITE_ADDRESS) != 0 ||
+     pic32_i2c1_send_byte(NVS_EUI_ADDRESS) != 0)
   {
     PRINTF("Failed to set the NVS read address\n");
     return 0;
   }
 
-  if(i2c1_send_repeated_start() != 0 ||
-     i2c1_send_byte(NVS_READ_ADDRESS) != 0 ||
-     i2c1_set_nack(0) != 0 ||
-     i2c1_receive_bytes((uint8_t*)&mac_address, sizeof(mac_address)) != 0)
+  if(pic32_i2c1_send_repeated_start() != 0 ||
+     pic32_i2c1_send_byte(NVS_READ_ADDRESS) != 0 ||
+     pic32_i2c1_set_nack(0) != 0 ||
+     pic32_i2c1_receive_bytes((uint8_t*)&mac_address, sizeof(mac_address)) != 0)
   {
     PRINTF("Failed to read MAC address bytes\n");
     return 0;
@@ -100,20 +96,12 @@ net_init()
   uint8_t i;
 
   queuebuf_init();
-  #ifdef __USE_CC2520__
-    cc2520_init();
-  #elif  __USE_CA8210__
-    ca8210_init();
-  #endif
+  ca8210_init();
 
   memset(&shortaddr, 0, sizeof(shortaddr));
   memset(&longaddr, 0, sizeof(longaddr));
   #ifndef FIXED_MAC_ADDRESS
-  #ifdef __USE_CC2520__
-    cc2520_get_random((uint8_t *)&longaddr, sizeof(longaddr));
-  #elif  __USE_CA8210__
-    longaddr = get_mac_address();
-  #endif
+  longaddr = get_mac_address();
   #else
   longaddr = FIXED_MAC_ADDRESS;
   #endif
@@ -126,12 +114,7 @@ net_init()
   }
   linkaddr_set_node_addr(&addr);
 
-  #ifdef __USE_CC2520__
-    cc2520_set_channel(RF_CHANNEL);
-    cc2520_set_pan_addr(IEEE802154_PANID, shortaddr, (uint8_t *)&longaddr);
-  #elif  __USE_CA8210__
-    ca8210_init_pib(RF_CHANNEL, IEEE802154_PANID, shortaddr, (uint8_t *)&longaddr);
-  #endif
+  ca8210_init_pib(RF_CHANNEL, IEEE802154_PANID, shortaddr, (uint8_t *)&longaddr);
 
   NETSTACK_RDC.init();
   NETSTACK_MAC.init();

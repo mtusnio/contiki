@@ -55,9 +55,9 @@
 #include <pic32_i2c.h>
 /*----------------------------------------------------------------------------------------------*/
 #define I2C_PORT(XX)                                                     \
-  static uint8_t i2c##XX##_nack_bit = 0;                                 \
+  static uint8_t pic32_i2c##XX##_nack_bit = 0;                           \
   uint8_t                                                                \
-  i2c##XX##_bus_idle(void)                                               \
+  pic32_i2c##XX##_bus_idle(void)                                         \
   {                                                                      \
     while(I2C##XX##CONbits.SEN || I2C##XX##CONbits.PEN                   \
                 || I2C##XX##CONbits.RSEN                                 \
@@ -69,7 +69,7 @@
   return 0;                                                              \
   }                                                                      \
   uint8_t                                                                \
-  i2c##XX##_init(void)                                                   \
+  pic32_i2c##XX##_init(void)                                             \
   {                                                                      \
     IEC1CLR = (_IEC1_I2C##XX##MIE_MASK ) | (_IEC1_I2C##XX##BIE_MASK );   \
     IFS1CLR = (_IFS1_I2C##XX##MIF_MASK ) | (_IFS1_I2C##XX##BIF_MASK );   \
@@ -78,16 +78,16 @@
     return 0;                                                            \
   }                                                                      \
   uint8_t                                                                \
-  i2c##XX##_set_frequency(uint32_t baudrate)                             \
+  pic32_i2c##XX##_set_frequency(uint32_t baudrate)                       \
   {                                                                      \
     I2C##XX##BRG = pic32_clock_calculate_brg(2, baudrate);               \
     return 0;                                                            \
   }                                                                      \
   uint8_t                                                                \
-  i2c##XX##_send_byte(uint8_t byte)                                      \
+  pic32_i2c##XX##_send_byte(uint8_t byte)                                \
   {                                                                      \
     I2C##XX##TRN = byte;                                                 \
-    i2c##XX##_bus_idle();                                                \
+    pic32_i2c##XX##_bus_idle();                                          \
     while (I2C##XX##STATbits.TBF) {                                      \
       ;                                                                  \
     }                                                                    \
@@ -102,10 +102,10 @@
     return 0;                                                            \
   }                                                                      \
   uint8_t                                                                \
-  i2c##XX##_send_bytes(const uint8_t *ptr, uint8_t length)               \
+  pic32_i2c##XX##_send_bytes(const uint8_t *ptr, uint8_t length)         \
   {                                                                      \
     while(length) {                                                      \
-    if(i2c##XX##_send_byte(*ptr))                                        \
+    if(pic32_i2c##XX##_send_byte(*ptr))                                  \
     return 1;                                                            \
     ptr++;                                                               \
     length--;                                                            \
@@ -113,10 +113,10 @@
     return 0;                                                            \
   }                                                                      \
   uint8_t                                                                \
-  i2c##XX##_receive_byte(uint8_t *data)                                  \
+  pic32_i2c##XX##_receive_byte(uint8_t *data)                            \
   {                                                                      \
     I2C##XX##CONSET = _I2C##XX##CON_RCEN_MASK;                           \
-    i2c##XX##_bus_idle();                                                \
+    pic32_i2c##XX##_bus_idle();                                          \
     while (!I2C##XX##STATbits.RBF) {                                     \
       ;                                                                  \
     }                                                                    \
@@ -124,29 +124,29 @@
       printf("Collision ocurred, Data is invalid\n");                    \
       return 1;                                                          \
     }                                                                    \
-    I2C##XX##CONbits.ACKDT = i2c##XX##_nack_bit;                         \
+    I2C##XX##CONbits.ACKDT = pic32_i2c##XX##_nack_bit;                   \
     I2C##XX##CONbits.ACKEN = 1;                                          \
-    i2c##XX##_bus_idle();                                                \
+    pic32_i2c##XX##_bus_idle();                                          \
     *data = I2C##XX##RCV & 0x000000ff;                                   \
-    i2c##XX##_nack_bit = 0;                                              \
+    pic32_i2c##XX##_nack_bit = 0;                                        \
     I2C##XX##CONbits.ACKDT = 0;	                                         \
     return 0;                                                            \
   }                                                                      \
   uint8_t                                                                \
-  i2c##XX##_set_nack(uint8_t bit)                                        \
+  pic32_i2c##XX##_set_nack(uint8_t bit)                                  \
   {                                                                      \
-    i2c##XX##_nack_bit = bit & 0x01;                                     \
+    pic32_i2c##XX##_nack_bit = bit & 0x01;                               \
     return 0;                                                            \
   }                                                                      \
   uint8_t                                                                \
-  i2c##XX##_receive_bytes(uint8_t *ptr, uint8_t length)                  \
+  pic32_i2c##XX##_receive_bytes(uint8_t *ptr, uint8_t length)            \
   {                                                                      \
-    uint8_t start_nack_bit = i2c##XX##_nack_bit;                         \
-    i2c##XX##_nack_bit = 0;                                              \
+    uint8_t start_nack_bit = pic32_i2c##XX##_nack_bit;                   \
+    pic32_i2c##XX##_nack_bit = 0;                                        \
     while(length) {                                                      \
     if(length == 1 && start_nack_bit)                                    \
-        i2c##XX##_nack_bit = start_nack_bit;                             \
-    if(i2c##XX##_receive_byte(ptr)) {                                    \
+        pic32_i2c##XX##_nack_bit = start_nack_bit;                       \
+    if(pic32_i2c##XX##_receive_byte(ptr)) {                              \
       return 1;                                                          \
     }                                                                    \
     ptr++;                                                               \
@@ -155,7 +155,7 @@
     return 0;                                                            \
   }                                                                      \
   uint8_t                                                                \
-  i2c##XX##_send_start(void)                                             \
+  pic32_i2c##XX##_send_start(void)                                       \
   {                                                                      \
     I2C##XX##CONSET = _I2C##XX##CON_SEN_MASK;                            \
     while(I2C##XX##CONbits.SEN) {                                        \
@@ -164,7 +164,7 @@
     return 0;                                                            \
   }                                                                      \
   uint8_t                                                                \
-  i2c##XX##_send_repeated_start(void)                                    \
+  pic32_i2c##XX##_send_repeated_start(void)                              \
   {                                                                      \
     I2C##XX##CONSET = _I2C##XX##CON_RSEN_MASK;                           \
     while (I2C##XX##CONbits.RSEN) {                                      \
@@ -173,7 +173,7 @@
     return 0;                                                            \
   }                                                                      \
   uint8_t                                                                \
-  i2c##XX##_send_stop(void)                                              \
+  pic32_i2c##XX##_send_stop(void)                                        \
   {                                                                      \
     I2C##XX##CONSET = _I2C##XX##CON_PEN_MASK;                            \
     while (I2C##XX##CONbits.PEN) {                                       \
@@ -182,13 +182,13 @@
     return 0;                                                            \
   }                                                                      \
   uint8_t                                                                \
-  i2c##XX##_master_disable(void)                                         \
+  pic32_i2c##XX##_master_disable(void)                                   \
   {                                                                      \
     I2C##XX##CONCLR = _I2C##XX##CON_ON_MASK;                             \
     return 0;                                                            \
   }                                                                      \
   uint8_t                                                                \
-  i2c##XX##_master_enable(void)                                          \
+  pic32_i2c##XX##_master_enable(void)                                    \
   {                                                                      \
     I2C##XX##CONSET = _I2C##XX##CON_ON_MASK;                             \
     return 0;                                                            \

@@ -62,32 +62,32 @@ PROCESS_THREAD(test_i2c, ev, data)
   static uint8_t send_data[4] = {TMP102_WRITE_ADDRESS, TMP102_CONFIG_ADDRESS, TMP102_CONFIG_MSB, TMP102_CONFIG_LSB};
   static uint8_t receive_data[2] = {0,0};
   static struct etimer et;
-  i2c1_init();
-  i2c1_set_frequency(TMP102_FREQUENCY);
-  i2c1_master_enable();
-  i2c1_send_start();
+  pic32_i2c1_init();
+  pic32_i2c1_set_frequency(TMP102_FREQUENCY);
+  pic32_i2c1_master_enable();
+  pic32_i2c1_send_start();
   /*pass the array to be send and no.of byte*/
-  if(i2c1_send_bytes (send_data, 4)) {
+  if(pic32_i2c1_send_bytes (send_data, 4)) {
     printf("Failed the connection to slave\n");
   }
-  i2c1_send_stop();
+  pic32_i2c1_send_stop();
   while(1) {
     etimer_set(&et, CLOCK_SECOND);
-    i2c1_send_start();
+    pic32_i2c1_send_start();
     /*commond to TMP102 write data on bus*/
-    i2c1_send_byte(TMP102_READ_ADDRESS);
+    pic32_i2c1_send_byte(TMP102_READ_ADDRESS);
     /*pass the array to be receive and no.of byte*/
-    if(i2c1_receive_bytes(receive_data, 2)) {
+    if(pic32_i2c1_receive_bytes(receive_data, 2)) {
       printf("Failed to receiving the data form slave\n");
     }
-    i2c1_send_stop();
+    pic32_i2c1_send_stop();
     printf("MSB byte is 0x%X\n", receive_data[0]);
     printf("LSB byte is 0x%X\n\n", receive_data[1]);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
   }
   exit:
-  i2c1_send_stop();
-  i2c1_master_disable();
+  pic32_i2c1_send_stop();
+  pic32_i2c1_master_disable();
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/

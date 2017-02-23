@@ -93,13 +93,13 @@ is exceeded.
 #define PROXIMITY_SENSOR_CLEAR_IRQ() __PROXIMITY_SENSOR_CLEAR_IRQ()
 #define __PROXIMITY_SENSOR_CLEAR_IRQ()                                  \
     do{                                                                   \
-        i2c1_master_enable();                                             \
-        i2c1_send_start();                                                \
-        i2c1_send_byte(WRITE_ADDR);                                       \
-        i2c1_send_byte(INTERRUPT_STATUS_REG);                             \
-        i2c1_send_byte(INTERRUPT_RESET);                                  \
-        i2c1_send_stop();                                                 \
-        i2c1_master_disable();                                            \
+        pic32_i2c1_master_enable();                                             \
+        pic32_i2c1_send_start();                                                \
+        pic32_i2c1_send_byte(WRITE_ADDR);                                       \
+        pic32_i2c1_send_byte(INTERRUPT_STATUS_REG);                             \
+        pic32_i2c1_send_byte(INTERRUPT_RESET);                                  \
+        pic32_i2c1_send_stop();                                                 \
+        pic32_i2c1_master_disable();                                            \
         (void)PORTD;                                                      \
         IFS1CLR = _IFS1_CNDIF_MASK;                                       \
         CNSTATDCLR = _CNSTATD_CNSTATD0_MASK;                              \

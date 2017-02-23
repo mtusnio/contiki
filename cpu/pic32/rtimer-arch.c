@@ -72,8 +72,8 @@ static uint32_t schedule;
 void
 rtimer_callback(void)
 {
-  pic32_timer23_disable_irq();
-  TMR2 = schedule;
+  pic32_timer45_disable_irq();
+  TMR4 = schedule;
 
   rtimer_run_next();
 }
@@ -81,29 +81,29 @@ rtimer_callback(void)
 void
 rtimer_arch_init(void)
 {
-  pic32_timer23_disable_irq();
-  IPC3CLR = _IPC3_T3IP_MASK | _IPC3_T3IS_MASK;
-  IPC3SET = (7 << _IPC3_T3IP_POSITION) | (3 << _IPC3_T3IS_POSITION);
-  T2CON = 0;
-  T3CON = 0;
-  T2CONSET = _T2CON_T32_MASK | (TIMER_B_PRESCALE_256 << _T2CON_TCKPS_POSITION);
-  PR2 =  0xFFFFFFFF;
-  TMR2 = 0;
-  pic32_timer23_start();
+  pic32_timer45_disable_irq();
+  IPC5CLR = _IPC5_T5IP_MASK | _IPC5_T5IS_MASK;
+  IPC5SET = (7 << _IPC5_T5IP_POSITION) | (3 << _IPC5_T5IS_POSITION);
+  T4CON = 0;
+  T5CON = 0;
+  T4CONSET = _T4CON_T32_MASK | (TIMER_B_PRESCALE_256 << _T4CON_TCKPS_POSITION);
+  PR4 =  0xFFFFFFFF;
+  TMR5 = 0;
+  pic32_timer45_start();
 }
 /*---------------------------------------------------------------------------*/
 rtimer_clock_t
 rtimer_arch_now(void)
 {
-  return TMR2;
+  return TMR4;
 }
 /*---------------------------------------------------------------------------*/
 void
 rtimer_arch_schedule(rtimer_clock_t t)
 {
   schedule = t;
-  PR2 =  t;
-  pic32_timer23_enable_irq();
+  PR4 = t;
+  pic32_timer45_enable_irq();
 }
 /*---------------------------------------------------------------------------*/
 
