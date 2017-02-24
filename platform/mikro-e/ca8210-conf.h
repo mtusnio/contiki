@@ -36,9 +36,8 @@
 #ifndef CA8210_CONF_H
 #define CA8210_CONF_H
 
-#undef DEBUG /* Conflict with a macro named DEBUG defined in compiler */
+
 #include <p32xxxx.h>
-#undef DEBUG
 
 #include <pic32_gpio.h>
 #include <pic32_irq.h>

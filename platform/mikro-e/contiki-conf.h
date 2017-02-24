@@ -36,11 +36,6 @@
 #define DEBUG_HIGHER_LEVELS 0
 
 #include <inttypes.h>
-#ifdef __USE_CC2520__
-  #include "cc2520-conf.h"
-#elif  __USE_CA8210__
-  #include "ca8210-conf.h"
-#endif
 
 /* Include project config file if defined in the project Makefile */
 #ifdef PROJECT_CONF_H
@@ -60,13 +55,6 @@ typedef uint32_t rtimer_clock_t;
 
 #define NETSTACK_CONF_WITH_IPV6                 1
 
-#ifdef __USE_CC2520__
-  #define NETSTACK_CONF_RADIO                     cc2520_driver
-  #define NETSTACK_CONF_FRAMER                    framer_802154
-  #ifndef NETSTACK_CONF_RDC
-    #define NETSTACK_CONF_RDC                     nullrdc_driver
-  #endif
-#elif  __USE_CA8210__
 /* netstack definition */
 /* note that for the ca8210 a new framer level (framer_hardmac) had to be created, */
 /* as framing is done in hardware, but 6lowpan is using a framer function that is  */
@@ -76,7 +64,6 @@ typedef uint32_t rtimer_clock_t;
   #ifndef NETSTACK_CONF_RDC
     #define NETSTACK_CONF_RDC                     nullrdc_noframer_driver
   #endif
-#endif
 
 #define NETSTACK_CONF_MAC                       nullmac_driver
 #define NETSTACK_CONF_NETWORK                   sicslowpan_driver

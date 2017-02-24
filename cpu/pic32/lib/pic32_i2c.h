@@ -42,21 +42,21 @@
 #ifdef __USE_I2C__
 /*---------------------------------------------------------------------------*/
 #define I2C_DEF(XX)                                          \
-  uint8_t i2c##XX##_init();                                  \
-  uint8_t i2c##XX##_bus_idle();                              \
-  uint8_t i2c##XX##_set_frequency (uint32_t );               \
-  uint8_t i2c##XX##_master_enable();                         \
-  uint8_t i2c##XX##_master_disable();                        \
-  uint8_t i2c##XX##_send_start();                            \
-  uint8_t i2c##XX##_send_repeated_start();                   \
-  uint8_t i2c##XX##_send_stop();                             \
-  uint8_t i2c##XX##_send_byte(uint8_t );                     \
-  uint8_t i2c##XX##_send_bytes(const uint8_t *, uint8_t );   \
+  uint8_t pic32_i2c##XX##_init();                                  \
+  uint8_t pic32_i2c##XX##_bus_idle();                              \
+  uint8_t pic32_i2c##XX##_set_frequency (uint32_t );               \
+  uint8_t pic32_i2c##XX##_master_enable();                         \
+  uint8_t pic32_i2c##XX##_master_disable();                        \
+  uint8_t pic32_i2c##XX##_send_start();                            \
+  uint8_t pic32_i2c##XX##_send_repeated_start();                   \
+  uint8_t pic32_i2c##XX##_send_stop();                             \
+  uint8_t pic32_i2c##XX##_send_byte(uint8_t );                     \
+  uint8_t pic32_i2c##XX##_send_bytes(const uint8_t *, uint8_t );   \
   /* Set this before the final receive to send NACK. */      \
   /* The driver will reset the nack after the read */        \
-  uint8_t i2c##XX##_set_nack(uint8_t bit);                   \
-  uint8_t i2c##XX##_receive_byte(uint8_t *);                 \
-  uint8_t i2c##XX##_receive_bytes(uint8_t *, uint8_t );
+  uint8_t pic32_i2c##XX##_set_nack(uint8_t bit);                   \
+  uint8_t pic32_i2c##XX##_receive_byte(uint8_t *);                 \
+  uint8_t pic32_i2c##XX##_receive_bytes(uint8_t *, uint8_t );
 /*---------------------------------------------------------------------------*/
 
 #ifdef __32MX470F512H__
@@ -70,5 +70,5 @@
 #endif /* __32MX470F512H__ */
 
 #endif /* __USE_I2C__ */
-  
+
 #endif /* INCLUDE_PIC32_I2C_H_ */
