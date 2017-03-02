@@ -96,6 +96,36 @@ sensor_callback(void)
 /*---------------------------------------------------------------------------*/
 #ifdef __USE_LPM__
 static void
+register_lpm_peripherals(void)
+{
+  #ifdef __ENABLE_SPI_PORT1_LPM__
+  lpm_register_peripheral(&pic32_spi1_periph);
+  #endif /* __ENABLE_SPI_PORT1_LPM__ */
+  #ifdef __ENABLE_SPI_PORT2_LPM__
+  lpm_register_peripheral(&pic32_spi2_periph);
+  #endif /* __ENABLE_SPI_PORT2_LPM__ */
+
+  #ifdef __ENABLE_UART_PORT1_LPM__
+  lpm_register_peripheral(&pic32_uart1_periph);
+  #endif /* __ENABLE_UART_PORT1_LPM__ */
+  #ifdef __ENABLE_UART_PORT2_LPM__
+  lpm_register_peripheral(&pic32_uart2_periph);
+  #endif /* __ENABLE_UART_PORT2_LPM__ */
+  #ifdef __ENABLE_UART_PORT3_LPM__
+  lpm_register_peripheral(&pic32_uart3_periph);
+  #endif /* __ENABLE_UART_PORT3_LPM__ */
+  #ifdef __ENABLE_UART_PORT4_LPM__
+  lpm_register_peripheral(&pic32_uart4_periph);
+  #endif /* __ENABLE_UART_PORT4_LPM__ */
+
+  #ifdef __ENABLE_I2C_PORT1_LPM__
+  lpm_register_peripheral(&pic32_i2c1_periph);
+  #endif /* __ENABLE_I2C_PORT1_LPM__ */
+  #ifdef __ENABLE_I2C_PORT2_LPM__
+  lpm_register_peripheral(&pic32_i2c2_periph);
+  #endif /* __ENABLE_I2C_PORT2_LPM__ */
+}
+static void
 power_down_peripherals(void)
 {
   #ifdef __ENABLE_SPI_PORT1_LPM__
