@@ -94,36 +94,38 @@ sensor_callback(void)
 }
 #endif
 /*---------------------------------------------------------------------------*/
+#ifdef __USE_LPM__
 static void
 power_down_peripherals(void)
 {
-  #ifdef __USE_SPI_PORT1__
+  #ifdef __ENABLE_SPI_PORT1_LPM__
   pic32_spi1_power_down();
-  #endif /* __USE_SPI_PORT1__ */
-  #ifdef __USE_SPI_PORT2__
+  #endif /* __ENABLE_SPI_PORT1_LPM__ */
+  #ifdef __ENABLE_SPI_PORT2_LPM__
   pic32_spi2_power_down();
-  #endif /* __USE_SPI_PORT2__ */
+  #endif /* __ENABLE_SPI_PORT2_LPM__ */
 
-  #ifdef __USE_UART_PORT1__
+  #ifdef __ENABLE_UART_PORT1_LPM__
   pic32_uart1_power_down();
-  #endif /* __USE_UART_PORT1__ */
-  #ifdef __USE_UART_PORT2__
+  #endif /* __ENABLE_UART_PORT1_LPM__ */
+  #ifdef __ENABLE_UART_PORT2_LPM__
   pic32_uart2_power_down();
-  #endif /* __USE_UART_PORT2__ */
-  #ifdef __USE_UART_PORT3__
+  #endif /* __ENABLE_UART_PORT2_LPM__ */
+  #ifdef __ENABLE_UART_PORT3_LPM__
   pic32_uart3_power_down();
-  #endif /* __USE_UART_PORT3__ */
-  #ifdef __USE_UART_PORT4__
+  #endif /* __ENABLE_UART_PORT3_LPM__ */
+  #ifdef __ENABLE_UART_PORT4_LPM__
   pic32_uart4_power_down();
-  #endif /* __USE_UART_PORT4__ */
+  #endif /* __ENABLE_UART_PORT4_LPM__ */
 
-  #ifdef __USE_I2C_PORT1__
+  #ifdef __ENABLE_I2C_PORT1_LPM__
   pic32_i2c1_power_down();
-  #endif /* __USE_I2C_PORT1__ */
-  #ifdef __USE_I2C_PORT2__
+  #endif /* __ENABLE_I2C_PORT1_LPM__ */
+  #ifdef __ENABLE_I2C_PORT2_LPM__
   pic32_i2c2_power_down();
-  #endif /* __USE_I2C_PORT2__ */
+  #endif /* __ENABLE_I2C_PORT2_LPM__ */
 }
+#endif
 /*---------------------------------------------------------------------------*/
 int
 main(int argc, char **argv)
@@ -135,13 +137,15 @@ main(int argc, char **argv)
   clock_init();
   leds_init();
   platform_init();
+#ifdef __USE_LPM__
   lpm_init();
-
+  register_lpm_peripherals();
   /*
    * Power down all peripherals that have an API: SPI, I2C, UART.
    * Any call to their init function will power up the peripheral.
    */
   power_down_peripherals();
+#endif
 
   process_init();
   process_start(&etimer_process, NULL);
@@ -176,7 +180,11 @@ main(int argc, char **argv)
       r = process_run();
     } while(r > 0);
     watchdog_stop();
+    #ifdef __USE_LPM__
     lpm_enter();
+    #else
+    asm volatile("wait");
+    #endif
     watchdog_start();
   }
 
