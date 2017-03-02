@@ -38,6 +38,7 @@
 #include <platform-init.h>
 #include <debug-uart.h>
 #include <pic32_irq.h>
+#include <pic32_cn_irq.h>
 #include <dev/ca8210/ca8210-radio.h>
 #include "dev/serial-line.h"
 #include <net-init.h>
@@ -45,9 +46,6 @@
 #include <sensors.h>
 #include "button-sensor.h"
 #include "dev/common-clicks.h"
-#include "dev/interrupts.h"
-
-void (*interrupt_isr)(void) = NULL;
 
 #ifndef UART_DEBUG_BAUDRATE
 #define UART_DEBUG_BAUDRATE 115200
@@ -59,6 +57,36 @@ SENSORS(&button_sensor, &button_sensor2, &motion_sensor);
 SENSORS(&button_sensor, &button_sensor2, &proximity_sensor);
 #else
 SENSORS(&button_sensor, &button_sensor2);
+#endif
+
+static void
+button_callback(void)
+{
+  if(BUTTON1_CHECK_IRQ()) {
+    /* Button1 was pressed */
+    button1_isr();
+  } else if(BUTTON2_CHECK_IRQ()) {
+    /* Button2 was pressed */
+    button2_isr();
+  }
+}
+
+/*---------------------------------------------------------------------------*/
+#if defined(MOTION_CLICK) || defined(PROXIMITY_CLICK)
+static void
+sensor_callback(void)
+{
+#ifdef MOTION_CLICK
+  if(MOTION_SENSOR_CHECK_IRQ()) {
+    /* Motion was detected */
+    motion_sensor_isr();
+#elif PROXIMITY_CLICK
+  } else if(PROXIMITY_SENSOR_CHECK_IRQ()) {
+    /* Proximity was detected */
+    proximity_sensor_isr();
+#endif
+  }
+}
 #endif
 
 /*---------------------------------------------------------------------------*/
@@ -77,6 +105,11 @@ main(int argc, char **argv)
   process_start(&etimer_process, NULL);
   ctimer_init();
   rtimer_init();
+
+  pic32_cn_irq_add_callback(button_callback);
+#if defined(MOTION_CLICK) || defined(PROXIMITY_CLICK)
+  pic32_cn_irq_add_callback(sensor_callback);
+#endif
 
   process_start(&sensors_process, NULL);
   SENSORS_ACTIVATE(button_sensor);
@@ -107,30 +140,6 @@ main(int argc, char **argv)
 
   return 0;
 }
-/*---------------------------------------------------------------------------*/
-ISR(_CHANGE_NOTICE_VECTOR)
-{
-  if(BUTTON1_CHECK_IRQ()) {
-    /* Button1 was pressed */
-    button1_isr();
-  } else if(BUTTON2_CHECK_IRQ()) {
-    /* Button2 was pressed */
-    button2_isr();
-#ifdef MOTION_CLICK
-  } else if(MOTION_SENSOR_CHECK_IRQ()) {
-    /* Motion was detected */
-    motion_sensor_isr();
-#elif PROXIMITY_CLICK
-  } else if(PROXIMITY_SENSOR_CHECK_IRQ()) {
-    /* Proximity was detected */
-    proximity_sensor_isr();
-#endif
-  }
-  else if(INTERRUPT_CHECK_IRQ() && interrupt_isr != NULL) {
-    interrupt_isr();
-  }
-}
-
 
 /*---------------------------------------------------------------------------*/
  ISR(_EXTERNAL_1_VECTOR)
