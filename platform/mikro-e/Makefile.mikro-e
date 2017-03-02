@@ -32,6 +32,8 @@ CONTIKI_PLAT_DEFS += -D __USE_I2C_PORT1__
 CONTIKI_PLAT_DEFS += -D __USE_PWM__
 CONTIKI_PLAT_DEFS += -D __USE_PWM_5__
 
+CONTIKI_PLAT_DEFS += -D __USE_ADC__
+
 CONTIKI_TARGET_SOURCEFILES = contiki-mikro-e-main.c leds-arch.c platform-init.c \
                              net-init.c button-sensor.c serial-line.c
 
