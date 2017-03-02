@@ -80,12 +80,13 @@ sensor_callback(void)
   if(MOTION_SENSOR_CHECK_IRQ()) {
     /* Motion was detected */
     motion_sensor_isr();
+  }
 #elif PROXIMITY_CLICK
-  } else if(PROXIMITY_SENSOR_CHECK_IRQ()) {
+  if(PROXIMITY_SENSOR_CHECK_IRQ()) {
     /* Proximity was detected */
     proximity_sensor_isr();
-#endif
   }
+#endif
 }
 #endif
 
