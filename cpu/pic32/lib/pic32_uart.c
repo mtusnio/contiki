@@ -88,11 +88,53 @@
 
 #include "dev/leds.h"
 
+#include "lpm.h"
+
+#define UART_PORT_LPM(XX)                                                                                       \
+  static uint32_t pic32_uart##XX##_state = 0;                                                                   \
+  static uint32_t pic32_uart##XX##_brg = 0;                                                                     \
+  int8_t                                                                                                        \
+  pic32_uart##XX##_power_down(void)                                                                             \
+  {                                                                                                             \
+    /*                                                                                                          \
+     * Save copy of register U##XX##MODE to restore its state                                                   \
+     * while powering up the peripheral.                                                                        \
+     * U##XX##BRG is cleared when powering down this peripheral.                                                \
+     */                                                                                                         \
+    pic32_uart##XX##_brg = U##XX##BRG;                                                                          \
+    pic32_uart##XX##_state = U##XX##MODE;                                                                       \
+                                                                                                                \
+    U##XX##MODESET = _U##XX##MODE_SIDL_MASK; /* Sleep peripheral in idle mode */                                \
+    U##XX##MODECLR = _U##XX##MODE_UARTEN_MASK;                                                                  \
+    PMD5SET = _PMD5_U##XX##MD_MASK;                                                                             \
+    return 0;                                                                                                   \
+  }                                                                                                             \
+  int8_t                                                                                                        \
+  pic32_uart##XX##_power_up(void)                                                                               \
+  {                                                                                                             \
+    PMD5CLR = _PMD5_U##XX##MD_MASK;                                                                             \
+    U##XX##BRG = pic32_uart##XX##_brg;                                                                          \
+    U##XX##MODE = pic32_uart##XX##_state;                                                                       \
+    return 0;                                                                                                   \
+  }                                                                                                             \
+  lpm_registered_peripheral_t pic32_uart##XX##_periph = {                                                       \
+    .power_up = pic32_uart##XX##_power_up,                                                                      \
+    .power_down = pic32_uart##XX##_power_down                                                                   \
+  };
+/*---------------------------------------------------------------------------*/
+#define UART_PORT_LPM_DUMMY(XX)                                                                                 \
+  static int8_t                                                                                                 \
+  pic32_uart##XX##_power_up(void)                                                                               \
+  {                                                                                                             \
+    return 0;                                                                                                   \
+  }
 /*---------------------------------------------------------------------------*/
 #define UART_PORT_INIT(XX, YY, ZZ, WW)                                                                          \
   int8_t                                                                                                        \
   pic32_uart##XX##_init(uint32_t baudrate, uint16_t byte_format)                                                \
   {                                                                                                             \
+    pic32_uart##XX##_power_up();                                                                                \
+                                                                                                                \
     /* Disable Interrupts: RX, TX, ERR */                                                                       \
     IEC##ZZ##CLR = _IEC##ZZ##_U##XX##EIE_MASK | _IEC##WW##_U##XX##TXIE_MASK | _IEC##ZZ##_U##XX##RXIE_MASK;      \
     IFS##ZZ##CLR = _IFS##ZZ##_U##XX##EIF_MASK | _IFS##WW##_U##XX##TXIF_MASK | _IFS##ZZ##_U##XX##RXIF_MASK;      \
@@ -115,6 +157,7 @@
     U##XX##STASET = _U##XX##STA_URXEN_MASK | _U##XX##STA_UTXEN_MASK; /* Enable RX and TX */                     \
                                                                                                                 \
     IEC##ZZ##SET = _IEC##ZZ##_U##XX##RXIE_MASK;                                                                 \
+                                                                                                                \
                                                                                                                 \
     /* Enable UART port */                                                                                      \
     U##XX##MODESET = _U##XX##MODE_UARTEN_MASK;                                                                  \
@@ -181,21 +224,41 @@
 
 #ifdef __32MX470F512H__
   #ifdef __USE_UART_PORT1__
+    #if defined __USE_LPM__ && defined __ENABLE_UART_PORT1_LPM__
+      UART_PORT_LPM(1)
+    #else
+      UART_PORT_LPM_DUMMY(1)
+    #endif /* __USE_LPM__ && __ENABLE_UART_PORT1_LPM__ */
   UART_PORT(1, 1)
   UART_PORT_INIT(1, 7, 1, 1)
   #endif /* __USE_UART_PORT1__ */
 
   #ifdef __USE_UART_PORT2__
+    #if defined __USE_LPM__ && defined __ENABLE_UART_PORT2_LPM__
+      UART_PORT_LPM(2)
+    #else
+      UART_PORT_LPM_DUMMY(2)
+    #endif /* __USE_LPM__ && __ENABLE_UART_PORT2_LPM__ */
   UART_PORT(2, 1)
   UART_PORT_INIT(2, 9, 1, 1)
   #endif /* __USE_UART_PORT2__ */
 
   #ifdef __USE_UART_PORT3__
+    #if defined __USE_LPM__ && defined __ENABLE_UART_PORT3_LPM__
+      UART_PORT_LPM(3)
+    #else
+      UART_PORT_LPM_DUMMY(3)
+    #endif /* __USE_LPM__ && __ENABLE_UART_PORT3_LPM__ */
   UART_PORT(3, 1)
   UART_PORT_INIT(3, 9, 1, 2)
   #endif /* __USE_UART_PORT3__ */
 
   #ifdef __USE_UART_PORT4__
+    #if defined __USE_LPM__ && defined __ENABLE_UART_PORT4_LPM__
+      UART_PORT_LPM(4)
+    #else
+      UART_PORT_LPM_DUMMY(4)
+    #endif /* __USE_LPM__ && __ENABLE_UART_PORT4_LPM__ */
   UART_PORT(4, 1)
   UART_PORT_INIT(4, 9, 2, 2)
   #endif /* __USE_UART_PORT4__ */

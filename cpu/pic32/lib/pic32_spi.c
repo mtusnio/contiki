@@ -79,6 +79,7 @@
 #include <pic32_irq.h>
 
 #include <p32xxxx.h>
+#include "lpm.h"
 
 /*
  * PIC32MX795F512L - Specific Functions
@@ -91,10 +92,56 @@
 #define IS_MASTER(flags)    ((flags) & SPI_MASTER)
 
 /*---------------------------------------------------------------------------*/
-#define SPI_PORT(XX, YY)                                    \
+#define SPI_PORT_LPM(XX)                                              \
+  static uint32_t pic32_spi##XX##_state = 0;                          \
+  static uint32_t pic32_spi##XX##_brg = 0;                            \
+  int8_t                                                              \
+  pic32_spi##XX##_power_down(void)                                    \
+  {                                                                   \
+    /*                                                                \
+     * Save copy of register SPI##XX##CON to restore its state        \
+     * while powering up the peripheral.                              \
+     * SPI##XX##BRG is cleared when powering down this peripheral.    \
+     */                                                               \
+    pic32_spi##XX##_state = SPI##XX##CON;                             \
+    pic32_spi##XX##_brg = SPI##XX##BRG;                               \
+                                                                      \
+    /* Sleep during idle mode */                                      \
+    SPI##XX##CONSET = _SPI##XX##CON_SIDL_MASK;                        \
+    SPI##XX##CONCLR = _SPI##XX##CON_ON_MASK;                          \
+    PMD5SET = _PMD5_SPI##XX##MD_MASK;                                 \
+    return 0;                                                         \
+  }                                                                   \
+  int8_t                                                              \
+  pic32_spi##XX##_power_up(void)                                      \
+  {                                                                   \
+    PMD5CLR = _PMD5_SPI##XX##MD_MASK;                                 \
+    SPI##XX##BRG = pic32_spi##XX##_brg;                               \
+    SPI##XX##CON = pic32_spi##XX##_state;                             \
+    return 0;                                                         \
+  }                                                                   \
+  lpm_registered_peripheral_t pic32_spi##XX##_periph = {              \
+    .power_up = pic32_spi##XX##_power_up,                             \
+    .power_down = pic32_spi##XX##_power_down                          \
+  };
+/*---------------------------------------------------------------------------*/
+#define SPI_PORT_LPM_DUMMY(XX)                                        \
+  static int8_t                                                       \
+  pic32_spi##XX##_power_up(void)                                      \
+  {                                                                   \
+    return 0;                                                         \
+  }                                                                   \
+  static int8_t                                                       \
+  pic32_spi##XX##_power_down(void)                                    \
+  {                                                                   \
+    return 0;                                                         \
+  }
+/*---------------------------------------------------------------------------*/
+#define SPI_PORT(XX, YY)                                              \
   int8_t                                                    \
   pic32_spi##XX##_init(uint32_t baudrate, uint32_t flags)   \
   {                                                         \
+    pic32_spi##XX##_power_up();                             \
                                                             \
     IEC##YY##CLR = _IEC##YY##_SPI##XX##EIE_MASK |           \
                   _IEC##YY##_SPI##XX##TXIE_MASK |           \
@@ -123,6 +170,7 @@
   pic32_spi##XX##_close()                                   \
   {                                                         \
     SPI##XX##CONCLR = _SPI##XX##CON_ON_MASK;                \
+    pic32_spi##XX##_power_down();                           \
     return SPI_NO_ERRORS;                                   \
   }                                                         \
                                                             \
@@ -224,12 +272,22 @@
 
 #ifdef __32MX470F512H__
   #ifdef __USE_SPI_PORT1__
+  #if defined __USE_LPM__ && defined __ENABLE_SPI_PORT1_LPM__
+    SPI_PORT_LPM(1)
+  #else
+    SPI_PORT_LPM_DUMMY(1)
+  #endif
   SPI_PORT(1, 1)
-  #endif /* __USE_SPI_PORT1__ */
+  #endif /* __USE_LPM__ && __USE_SPI_PORT1__ */
 
   #ifdef __USE_SPI_PORT2__
+  #if defined __USE_LPM__ && defined __ENABLE_SPI_PORT2_LPM__
+    SPI_PORT_LPM(2)
+  #else
+    SPI_PORT_LPM_DUMMY(2)
+  #endif
   SPI_PORT(2, 1)
-  #endif /* __USE_SPI_PORT2__ */
+  #endif /* __USE_LPM__ && __USE_SPI_PORT2__ */
 #endif
 
 #endif /* __USE_SPI__ */

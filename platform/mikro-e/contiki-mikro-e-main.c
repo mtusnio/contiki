@@ -39,6 +39,7 @@
 #include <debug-uart.h>
 #include <pic32_irq.h>
 #include <pic32_cn_irq.h>
+#include "lpm.h"
 #include <dev/ca8210/ca8210-radio.h>
 #include "dev/serial-line.h"
 #include <net-init.h>
@@ -46,6 +47,9 @@
 #include <sensors.h>
 #include "button-sensor.h"
 #include "dev/common-clicks.h"
+#include <pic32_i2c.h>
+#include <pic32_spi.h>
+#include <pic32_uart.h>
 
 #ifndef UART_DEBUG_BAUDRATE
 #define UART_DEBUG_BAUDRATE 115200
@@ -89,7 +93,69 @@ sensor_callback(void)
 #endif
 }
 #endif
+/*---------------------------------------------------------------------------*/
+#ifdef __USE_LPM__
+static void
+register_lpm_peripherals(void)
+{
+  #ifdef __ENABLE_SPI_PORT1_LPM__
+  lpm_register_peripheral(&pic32_spi1_periph);
+  #endif /* __ENABLE_SPI_PORT1_LPM__ */
+  #ifdef __ENABLE_SPI_PORT2_LPM__
+  lpm_register_peripheral(&pic32_spi2_periph);
+  #endif /* __ENABLE_SPI_PORT2_LPM__ */
 
+  #ifdef __ENABLE_UART_PORT1_LPM__
+  lpm_register_peripheral(&pic32_uart1_periph);
+  #endif /* __ENABLE_UART_PORT1_LPM__ */
+  #ifdef __ENABLE_UART_PORT2_LPM__
+  lpm_register_peripheral(&pic32_uart2_periph);
+  #endif /* __ENABLE_UART_PORT2_LPM__ */
+  #ifdef __ENABLE_UART_PORT3_LPM__
+  lpm_register_peripheral(&pic32_uart3_periph);
+  #endif /* __ENABLE_UART_PORT3_LPM__ */
+  #ifdef __ENABLE_UART_PORT4_LPM__
+  lpm_register_peripheral(&pic32_uart4_periph);
+  #endif /* __ENABLE_UART_PORT4_LPM__ */
+
+  #ifdef __ENABLE_I2C_PORT1_LPM__
+  lpm_register_peripheral(&pic32_i2c1_periph);
+  #endif /* __ENABLE_I2C_PORT1_LPM__ */
+  #ifdef __ENABLE_I2C_PORT2_LPM__
+  lpm_register_peripheral(&pic32_i2c2_periph);
+  #endif /* __ENABLE_I2C_PORT2_LPM__ */
+}
+static void
+power_down_peripherals(void)
+{
+  #ifdef __ENABLE_SPI_PORT1_LPM__
+  pic32_spi1_power_down();
+  #endif /* __ENABLE_SPI_PORT1_LPM__ */
+  #ifdef __ENABLE_SPI_PORT2_LPM__
+  pic32_spi2_power_down();
+  #endif /* __ENABLE_SPI_PORT2_LPM__ */
+
+  #ifdef __ENABLE_UART_PORT1_LPM__
+  pic32_uart1_power_down();
+  #endif /* __ENABLE_UART_PORT1_LPM__ */
+  #ifdef __ENABLE_UART_PORT2_LPM__
+  pic32_uart2_power_down();
+  #endif /* __ENABLE_UART_PORT2_LPM__ */
+  #ifdef __ENABLE_UART_PORT3_LPM__
+  pic32_uart3_power_down();
+  #endif /* __ENABLE_UART_PORT3_LPM__ */
+  #ifdef __ENABLE_UART_PORT4_LPM__
+  pic32_uart4_power_down();
+  #endif /* __ENABLE_UART_PORT4_LPM__ */
+
+  #ifdef __ENABLE_I2C_PORT1_LPM__
+  pic32_i2c1_power_down();
+  #endif /* __ENABLE_I2C_PORT1_LPM__ */
+  #ifdef __ENABLE_I2C_PORT2_LPM__
+  pic32_i2c2_power_down();
+  #endif /* __ENABLE_I2C_PORT2_LPM__ */
+}
+#endif
 /*---------------------------------------------------------------------------*/
 int
 main(int argc, char **argv)
@@ -101,6 +167,15 @@ main(int argc, char **argv)
   clock_init();
   leds_init();
   platform_init();
+#ifdef __USE_LPM__
+  lpm_init();
+  register_lpm_peripherals();
+  /*
+   * Power down all peripherals that have an API: SPI, I2C, UART.
+   * Any call to their init function will power up the peripheral.
+   */
+  power_down_peripherals();
+#endif
 
   process_init();
   process_start(&etimer_process, NULL);
@@ -135,7 +210,11 @@ main(int argc, char **argv)
       r = process_run();
     } while(r > 0);
     watchdog_stop();
+    #ifdef __USE_LPM__
+    lpm_enter();
+    #else
     asm volatile("wait");
+    #endif
     watchdog_start();
   }
 

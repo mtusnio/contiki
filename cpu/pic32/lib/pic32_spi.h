@@ -61,7 +61,7 @@
 #ifdef __USE_SPI__
 
 #include <p32xxxx.h>
-
+#include "lpm.h"
 #include <stdint.h>
 
 /* Returned Messages */
@@ -91,6 +91,10 @@
   int8_t pic32_spi##XX##_write(const uint8_t *data, uint32_t len);\
   int8_t pic32_spi##XX##_transfer(const uint8_t *tx_data, uint8_t *rx_data, uint32_t len);\
   int8_t pic32_spi##XX##_read(uint8_t *data, uint32_t len);
+#define SPI_LPM_DEF(XX)                                           \
+  int8_t pic32_spi##XX##_power_down(void);                        \
+  int8_t pic32_spi##XX##_power_up(void);                          \
+  extern lpm_registered_peripheral_t pic32_spi##XX##_periph;
 
 #ifdef __32MX795F512L__
   #ifdef __USE_SPI_PORT1__
@@ -113,10 +117,16 @@
 #ifdef __32MX470F512H__
   #ifdef __USE_SPI_PORT1__
   SPI_DEF(1)
+    #if defined __USE_LPM__ && defined __ENABLE_SPI_PORT1_LPM__
+    SPI_LPM_DEF(1)
+    #endif /* __USE_LPM__ && __ENABLE_SPI_PORT1_LPM__ */
   #endif /* __USE_SPI_PORT1__ */
 
   #ifdef __USE_SPI_PORT2__
   SPI_DEF(2)
+    #if defined __USE_LPM__ && defined __ENABLE_SPI_PORT2_LPM__
+    SPI_LPM_DEF(2)
+    #endif /* __USE_LPM__ && __ENABLE_SPI_PORT2_LPM__ */
   #endif /* __USE_SPI_PORT2__ */
 #endif /* __32MX470F512H__ */
 
