@@ -21,6 +21,7 @@ def mikroe_apps = [
     'test-i2c',
     'test-led',
     'test-motion',
+    'test-proximity',
     'test-relay',
     'test-thermo3',
 ]

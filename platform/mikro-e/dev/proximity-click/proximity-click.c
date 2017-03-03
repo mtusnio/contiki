@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <p32xxxx.h>
 #include <pic32_i2c.h>
+#include <pic32_gpio.h>
 #include <lib/sensors.h>
 #include "proximity-click.h"
 
