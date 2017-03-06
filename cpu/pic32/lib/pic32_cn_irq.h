@@ -41,68 +41,33 @@
  */
 
 /**
- * \file   cpu/pic32/watchdog.c
- * \brief  PIC32MX Watchdog routines
- * \author Giovanni Pellerano <giovanni.pellerano@evilaliv3.org>
- * \date   2012-03-23
+ * \file   pic32_cn_irq.h
+ * \brief  IRQ change notice driver for PIC32MX
+ * \author Michal Tusnio <michal.tusnio@imgtec.com>
+ * \date   2017-03-01
  */
 
-#include "dev/watchdog.h"
+#ifndef INCLUDE_PIC32_CN_IRQ_H_
+#define INCLUDE_PIC32_CN_IRQ_H_
 
+#ifdef __USE_CN_IRQ__
+
+#include <stdint.h>
 #include <pic32_irq.h>
 
-#include <p32xxxx.h>
+#define IRQ_NO_ERROR            (0)
+#define IRQ_BAD_ARGUMENT        (1)
+#define IRQ_UNINITIALISED       (2)
+#define IRQ_NOT_IN_LIST         (3)
+#define IRQ_ALREADY_IN_LIST     (4)
 
-/*---------------------------------------------------------------------------*/
-void
-watchdog_init(void)
-{
-  WDTCON = 0;
-}
-/*---------------------------------------------------------------------------*/
-void
-watchdog_start(void)
-{
-  WDTCONSET = _WDTCON_ON_MASK;
-}
-/*---------------------------------------------------------------------------*/
-void
-watchdog_periodic(void)
-{
-  WDTCONSET = _WDTCON_WDTCLR_MASK;
-}
-/*---------------------------------------------------------------------------*/
-void
-watchdog_stop(void)
-{
-  WDTCONCLR = _WDTCON_ON_MASK;
-}
-/*---------------------------------------------------------------------------*/
-void
-watchdog_reboot(void)
-{
-  volatile int *p = (int *)&RSWRST;
 
-  /* Unlock sequence */
-  ASM_DIS_INT;
-  if(!(DMACONbits.SUSPEND)){
-    DMACONSET=_DMACON_SUSPEND_MASK; // suspend
-    while((DMACONbits.DMABUSY)) {
-      ; // wait to be actually suspended
-    }
-  }
+int8_t pic32_cn_irq_init(void);
+int8_t pic32_cn_irq_add_callback(void (*callback)(void));
+int8_t pic32_cn_irq_remove_callback(void (*callback)(void));
+int8_t pic32_cn_irq_release(void);
+#endif
 
-  SYSKEY = 0;
-  SYSKEY = 0xaa996655;
-  SYSKEY = 0x556699aa;
-
-  RSWRSTSET=_RSWRST_SWRST_MASK;
-  *p;
-
-  while(1) {
-    ;
-  }
-}
-/*---------------------------------------------------------------------------*/
+#endif /* INCLUDE_PIC32_CN_IRQ_H_ */
 
 /** @} */

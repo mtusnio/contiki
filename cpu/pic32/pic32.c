@@ -59,6 +59,10 @@
 #include <pic32_clock.h>
 #include <pic32_irq.h>
 
+#ifdef __USE_CN_IRQ__
+#include <pic32_cn_irq.h>
+#endif
+
 #include <p32xxxx.h>
 #include <stdint.h>
 
@@ -106,15 +110,6 @@ pic32_init(void)
 
   INTCONSET = _INTCON_MVEC_MASK;
 
-  SYSKEY = 0;
-  SYSKEY = 0xaa996655;
-  SYSKEY = 0x556699aa;
-
-  /* Enable Sleep Mode */
-  OSCCONCLR = 1 << _OSCCON_SLPEN_POSITION;
-
-  SYSKEY = 0;
-
   /*
    * Compute minimum number of wait state required such that
    *      (ws_count + 1) * FLASH_CLOCK_SPEED >= SYSCLK
@@ -127,6 +122,10 @@ pic32_init(void)
   CHECON = (0b01 << _CHECON_DCSZ_POSITION)    /* Data cache size of 1 line */
     | (0b11 << _CHECON_PREFEN_POSITION)  /* Enable predictive prefetch for all regions */
     | (wait_state_count & _CHECON_PFMWS_MASK);
+
+#ifdef __USE_CN_IRQ__
+  pic32_cn_irq_init();
+#endif
 
   ASM_EN_INT;
 }
