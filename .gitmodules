@@ -10,3 +10,6 @@
 [submodule "dev/ca8210"]
 	path = dev/ca8210
 	url = https://github.com/Cascoda/ca8210-contiki.git
+[submodule "platform/mikro-e/apps/letmecreateiot"]
+	path = platform/mikro-e/apps/letmecreateiot
+	url = https://github.com/CreatorDev/LetMeCreateIoT.git
