@@ -58,7 +58,7 @@ node('docker && imgtec') {
         stage('Build') {
             for (item in examples) {
                 try {
-                    sh "cd examples/${item} && make TARGET=mikro-e CHANNEL=${params.CHANNEL} \
+                    sh "cd examples/${item} && make -j8 TARGET=mikro-e CHANNEL=${params.CHANNEL} \
                     PAN_ID=${params.PAN_ID} USE_SERIAL_PADS=${params.PADS}"
                     sh "cd examples/${item} && xc32-bin2hex *.mikro-e && mv *.hex ${WORKSPACE}/"
                 } catch(exc) {
@@ -68,7 +68,7 @@ node('docker && imgtec') {
             }
             for (item in mikroe_apps) {
                 try {
-                    sh "cd platform/mikro-e/apps/${item} && make TARGET=mikro-e CHANNEL=${params.CHANNEL} \
+                    sh "cd platform/mikro-e/apps/${item} && make -j8 TARGET=mikro-e CHANNEL=${params.CHANNEL} \
                     PAN_ID=${params.PAN_ID} USE_SERIAL_PADS=${params.PADS}"
                     sh "cd platform/mikro-e/apps/${item} && xc32-bin2hex *.mikro-e && mv *.hex ${WORKSPACE}/"
                 } catch(exc) {
