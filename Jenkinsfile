@@ -51,7 +51,7 @@ node('docker && imgtec') {
                 extensions: scm.extensions + [
                     [$class: 'CleanCheckout'],
                     [$class: 'PruneStaleBranch'],
-                    [$class: 'SubmoduleOption', recursiveSubmodules: true]
+                    [$class: 'SubmoduleOption']
                 ],
             ])
         }
