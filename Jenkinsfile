@@ -44,7 +44,7 @@ node('docker && imgtec') {
             checkout([$class: 'GitSCM',
                 userRemoteConfigs: scm.userRemoteConfigs,
                 branches: scm.branches,
-                doGenerateSubmoduleConfigurations: true,
+                doGenerateSubmoduleConfigurations: scm.doGenerateSubmoduleConfigurations,
                 submoduleCfg: scm.submoduleCfg,
                 browser: scm.browser,
                 gitTool: scm.gitTool,
