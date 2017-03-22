@@ -91,11 +91,14 @@
 #include "lpm.h"
 
 #define UART_PORT_LPM(XX)                                                                                       \
+  static void pic32_uart##XX##_wait_tx_fifo_empty(void);                                                        \
   static uint32_t pic32_uart##XX##_state = 0;                                                                   \
   static uint32_t pic32_uart##XX##_brg = 0;                                                                     \
   int8_t                                                                                                        \
   pic32_uart##XX##_power_down(void)                                                                             \
   {                                                                                                             \
+    pic32_uart##XX##_wait_tx_fifo_empty();                                                                      \
+                                                                                                                \
     /*                                                                                                          \
      * Save copy of register U##XX##MODE to restore its state                                                   \
      * while powering up the peripheral.                                                                        \
@@ -136,6 +139,12 @@
 
 /*---------------------------------------------------------------------------*/
 #define UART_PORT_INIT(XX, YY, ZZ, WW)                                                                          \
+  static void                                                                                                   \
+  pic32_uart##XX##_wait_tx_fifo_empty(void)                                                                     \
+  {                                                                                                             \
+    while(U##XX##STAbits.UTXISEL1 && !U##XX##STAbits.UTXISEL0 && !IFS##WW##bits.U##XX##TXIF) {                  \
+    }                                                                                                           \
+  }                                                                                                             \
   int8_t                                                                                                        \
   pic32_uart##XX##_init(uint32_t baudrate, uint16_t byte_format)                                                \
   {                                                                                                             \
@@ -161,6 +170,7 @@
     /* Status bits */                                                                                           \
     U##XX##STA = 0;                                                                                             \
     U##XX##STASET = _U##XX##STA_URXEN_MASK | _U##XX##STA_UTXEN_MASK; /* Enable RX and TX */                     \
+    U##XX##STASET = _U##XX##STA_UTXISEL1_MASK; /* Assert UxTXIF if TX FIFO is empty */                          \
                                                                                                                 \
     IEC##ZZ##SET = _IEC##ZZ##_U##XX##RXIE_MASK;                                                                 \
                                                                                                                 \
@@ -173,13 +183,14 @@
 int8_t                                                                                                          \
 pic32_uart##XX##_release(void)                                                                                  \
 {                                                                                                               \
+  pic32_uart##XX##_wait_tx_fifo_empty();                                                                        \
   U##XX##MODE = 0;                                                                                              \
   pic32_uart##XX##_power_down();                                                                                \
   return 0;                                                                                                     \
 }
 
 /*---------------------------------------------------------------------------*/
-#define UART_PORT(XX, YY)                                          \
+#define UART_PORT(XX, YY, ZZ)                                      \
                                                                    \
   int (*uart##XX##_input_handler) (unsigned char c) = NULL;        \
                                                                    \
@@ -192,13 +203,12 @@ pic32_uart##XX##_release(void)                                                  
   int8_t                                         \
   pic32_uart##XX##_write(uint8_t data)           \
   {                                              \
-    volatile uint8_t wait;                       \
-                                                 \
-    do {                                         \
-      wait = U##XX##STAbits.UTXBF;               \
-    } while(wait);                               \
+    while(U##XX##STAbits.UTXBF) {                \
+    }                                            \
                                                  \
     U##XX##TXREG = data;                         \
+    IFS##ZZ##bits.U##XX##TXIF = 0;               \
+                                                 \
                                                  \
     return UART_NO_ERROR;                        \
   }
@@ -243,7 +253,7 @@ pic32_uart##XX##_release(void)                                                  
     #else
       UART_PORT_LPM_DUMMY(1)
     #endif /* __USE_LPM__ && __ENABLE_UART_PORT1_LPM__ */
-  UART_PORT(1, 1)
+  UART_PORT(1, 1, 1)
   UART_PORT_INIT(1, 7, 1, 1)
   #endif /* __USE_UART_PORT1__ */
 
@@ -253,7 +263,7 @@ pic32_uart##XX##_release(void)                                                  
     #else
       UART_PORT_LPM_DUMMY(2)
     #endif /* __USE_LPM__ && __ENABLE_UART_PORT2_LPM__ */
-  UART_PORT(2, 1)
+  UART_PORT(2, 1, 1)
   UART_PORT_INIT(2, 9, 1, 1)
   #endif /* __USE_UART_PORT2__ */
 
@@ -263,7 +273,7 @@ pic32_uart##XX##_release(void)                                                  
     #else
       UART_PORT_LPM_DUMMY(3)
     #endif /* __USE_LPM__ && __ENABLE_UART_PORT3_LPM__ */
-  UART_PORT(3, 1)
+  UART_PORT(3, 1, 2)
   UART_PORT_INIT(3, 9, 1, 2)
   #endif /* __USE_UART_PORT3__ */
 
@@ -273,7 +283,7 @@ pic32_uart##XX##_release(void)                                                  
     #else
       UART_PORT_LPM_DUMMY(4)
     #endif /* __USE_LPM__ && __ENABLE_UART_PORT4_LPM__ */
-  UART_PORT(4, 1)
+  UART_PORT(4, 1, 2)
   UART_PORT_INIT(4, 9, 2, 2)
   #endif /* __USE_UART_PORT4__ */
 #endif /* __32MX470F512H__ */
