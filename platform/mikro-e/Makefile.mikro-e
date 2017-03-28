@@ -55,6 +55,9 @@ PAN_ID?=0xabcd
 CFLAGS += -DRF_CHANNEL=$(CHANNEL)
 CFLAGS += -DIEEE802154_CONF_PANID=$(PAN_ID)
 
+HEAP_SIZE?=32768
+LDFLAGS += -Wl,--defsym,_min_heap_size=$(HEAP_SIZE)
+
 include $(CONTIKI)/cpu/pic32/Makefile.pic32
 
 
